@@ -47,7 +47,7 @@ class ConfigActivity : AppCompatActivity() {
     private val AD_COUNTER_KEY = "AdDisplayCounter"
     private val FREQUENCY_LIMIT = 2 // Mostrará el anuncio cada 3 veces que se ejecute la acción.
     // ID de prueba de Google. RECUERDA: REEMPLAZA ESTO con tu ID REAL antes de publicar.
-    private val INTERSTITIAL_AD_UNIT_ID = "ca-app-pub-3940256099942544/1033173712"
+    private val INTERSTITIAL_AD_UNIT_ID = "ca-app-pub-6378961597427920/3082064109"
 
     // Nodo de lectura dinámico: 'produccion' para usuarios, 'prueba' para el admin
     private var readNode: String = "produccion"

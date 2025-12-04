@@ -30,7 +30,7 @@
                 android:layout_centerHorizontal="true"
                 android:layout_marginBottom="15dp"
                 app:adSize="LARGE_BANNER"
-                app:adUnitId="ca-app-pub-3940256099942544/6300978111" />
+                app:adUnitId="ca-app-pub-6378961597427920/3155691078" />
 
             <RelativeLayout
                 android:layout_width="match_parent"
