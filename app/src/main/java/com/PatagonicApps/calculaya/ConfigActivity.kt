@@ -24,6 +24,10 @@ import com.google.android.gms.ads.LoadAdError
 import com.google.android.gms.ads.interstitial.InterstitialAd
 import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback
 
+// Importaciones de Firebase para control remoto
+import com.google.firebase.Firebase
+import com.google.firebase.remoteconfig.ktx.remoteConfig
+
 // Importaciones de Constantes
 import com.PatagonicApps.calculaya.PREFS_NODE_KEY
 import com.PatagonicApps.calculaya.RateManager.RATES_FILE_NAME
@@ -46,8 +50,12 @@ class ConfigActivity : AppCompatActivity() {
     // ⭐️ Constantes para el Intersticial ⭐️
     private val AD_COUNTER_KEY = "AdDisplayCounter"
     private val FREQUENCY_LIMIT = 2 // Mostrará el anuncio cada 3 veces que se ejecute la acción.
-    // ID de prueba de Google. RECUERDA: REEMPLAZA ESTO con tu ID REAL antes de publicar.
+
+    // ⚠️ ID DE PRODUCCIÓN: ASUMIENDO QUE ESTE ES TU ID REAL
     private val INTERSTITIAL_AD_UNIT_ID = "ca-app-pub-6378961597427920/3082064109"
+
+    // ⭐️ CONSTANTES PARA EL CONTROL REMOTO (SharedPreferences de MainActivity) ⭐️
+    private val KEY_ADS_LOCAL_ACTIVATED = "ads_local_activated" // Estado de monetización (true/false)
 
     // Nodo de lectura dinámico: 'produccion' para usuarios, 'prueba' para el admin
     private var readNode: String = "produccion"
@@ -86,7 +94,7 @@ class ConfigActivity : AppCompatActivity() {
         setupSpinners()
         checkAndDownloadRates()
 
-        // ⭐️ 5. PRE-CARGAR el anuncio intersticial ⭐️
+        // ⭐️ 5. PRE-CARGAR el anuncio intersticial (Solo si la monetización está activa) ⭐️
         loadInterstitialAd()
 
         // 6. Listener para guardar la configuración de usuario
@@ -97,35 +105,63 @@ class ConfigActivity : AppCompatActivity() {
     }
 
     // -------------------------------------------------------------
-    // ⭐️ LÓGICA DE INTERSTICIAL ⭐️
+    // ⭐️ GESTIÓN DE CICLO DE VIDA (Obligatorio para Intersticiales) ⭐️
+    // -------------------------------------------------------------
+
+    // El intersticial no necesita onResume/onPause/onDestroy, pero la Activity sí.
+    // Como el anuncio solo está precargado en memoria (mInterstitialAd), no hay View que pausar.
+
+    // -------------------------------------------------------------
+    // ⭐️ LÓGICA DE INTERSTICIAL CONTROLADA POR MONETIZACIÓN ⭐️
     // -------------------------------------------------------------
 
     /**
-     * Pre-carga el anuncio intersticial. Se llama en onCreate.
+     * Pre-carga el anuncio intersticial SOLO si la monetización está activa localmente.
+     * Lee el estado permanente que guarda MainActivity tras verificar Firebase.
      */
     private fun loadInterstitialAd() {
-        val adRequest = AdRequest.Builder().build()
+        val sharedPref = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
 
-        InterstitialAd.load(this, INTERSTITIAL_AD_UNIT_ID, adRequest,
-            object : InterstitialAdLoadCallback() {
-                override fun onAdFailedToLoad(adError: LoadAdError) {
-                    Log.d("AdMob", "Fallo al cargar anuncio: ${adError.message}")
-                    mInterstitialAd = null
-                }
+        // ⭐️ Verificación del estado de monetización guardado por MainActivity ⭐️
+        val isLocallyActivated = sharedPref.getBoolean(KEY_ADS_LOCAL_ACTIVATED, false)
 
-                override fun onAdLoaded(interstitialAd: InterstitialAd) {
-                    Log.d("AdMob", "Anuncio cargado.")
-                    mInterstitialAd = interstitialAd
+        if (isLocallyActivated) {
+            val adRequest = AdRequest.Builder().build()
+
+            InterstitialAd.load(this, INTERSTITIAL_AD_UNIT_ID, adRequest,
+                object : InterstitialAdLoadCallback() {
+                    override fun onAdFailedToLoad(adError: LoadAdError) {
+                        Log.d("AdMob", "Fallo al cargar anuncio: ${adError.message}")
+                        mInterstitialAd = null
+                    }
+
+                    override fun onAdLoaded(interstitialAd: InterstitialAd) {
+                        Log.d("AdMob", "Anuncio cargado.")
+                        mInterstitialAd = interstitialAd
+                    }
                 }
-            }
-        )
+            )
+        } else {
+            Log.d("AdMob", "Monetización apagada. No se carga Intersticial.")
+        }
     }
 
     /**
-     * Muestra el anuncio si el contador lo permite.
+     * Muestra el anuncio si el contador lo permite Y si la monetización está activa.
      */
     private fun checkAndShowInterstitialOnSave() {
         val sharedPref = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+
+        // ⭐️ NUEVA VERIFICACIÓN DE MONETIZACIÓN ⭐️
+        val isLocallyActivated = sharedPref.getBoolean(KEY_ADS_LOCAL_ACTIVATED, false)
+
+        if (!isLocallyActivated) {
+            // Si la monetización está apagada, saltamos el anuncio y terminamos el flujo.
+            finishActivityFlow()
+            return
+        }
+
+        // SI LA MONETIZACIÓN ESTÁ ACTIVA, CONTINUAMOS con el contador:
         var count = sharedPref.getInt(AD_COUNTER_KEY, 0)
 
         // 1. Incrementa el contador para la próxima vez
@@ -214,6 +250,8 @@ class ConfigActivity : AppCompatActivity() {
         spinnerCiudad.adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, nombresCiudades).apply {
             setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         }
+
+        loadSavedConfig() // Añadido para asegurar que la configuración guardada se cargue después de configurar los adapters
     }
 
     private fun loadSavedConfig() {
@@ -237,6 +275,9 @@ class ConfigActivity : AppCompatActivity() {
     // -------------------------------------------------------------
 
     private fun checkAndDownloadRates() {
+        progressBar.visibility = View.VISIBLE
+        btnGuardarConfig.isEnabled = false // Deshabilita mientras verifica
+
         val dbRef = FirebaseDatabase.getInstance().reference.child(readNode)
         val sharedPrefs = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
 
@@ -363,6 +404,9 @@ class ConfigActivity : AppCompatActivity() {
         val fileRef = storageRef.child("$storagePath/$remoteFileName")
 
         val localFile = File(applicationContext.filesDir, localFileName)
+
+        progressBar.visibility = View.VISIBLE
+        btnGuardarConfig.isEnabled = false // Asegurar que el botón esté desactivado durante la descarga
 
         return fileRef.getFile(localFile)
             .addOnSuccessListener {

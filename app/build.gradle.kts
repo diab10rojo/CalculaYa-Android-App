@@ -47,6 +47,10 @@ dependencies {
     implementation(libs.firebase.database.ktx)     // Control de versión de tarifas (Realtime DB)
     implementation("com.google.firebase:firebase-storage-ktx") // Descarga del JSON (Storage)
 
+    // ⭐️ REMOTE CONFIG: SOLO UNA VERSIÓN (KTX) ⭐️
+    implementation("com.google.firebase:firebase-config-ktx")
+    // implementation(libs.firebase.config) <-- LÍNEA ELIMINADA POR SER REDUNDANTE/CONFLICTIVA
+
     // 3. Librería de Serialización/Deserialización
     implementation("com.google.code.gson:gson:2.10.1")
 

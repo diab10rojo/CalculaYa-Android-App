@@ -25,9 +25,14 @@ import com.google.android.gms.ads.AdView
 import kotlin.math.min
 import android.text.Html
 import android.os.Build
+import android.util.Log
+import com.google.firebase.Firebase
+import com.google.firebase.remoteconfig.ktx.remoteConfig
+import com.google.firebase.remoteconfig.ktx.remoteConfigSettings
+import com.google.firebase.remoteconfig.remoteConfig
+
 
 // La constante IS_ADMIN_BUILD debe estar definida en Constants.kt
-// Usamos CostDetail solo si está definida en otro archivo.
 // Asumiendo que tienes una data class CostDetail(val description: String, val amount: Float)
 
 /**
@@ -50,6 +55,10 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var adView: AdView // ⭐️ DECLARACIÓN DEL BANNER ⭐️
 
+    // ⭐️ CONSTANTES DE FIREBASE ⭐️
+    private val KEY_ADS_FIREBASE_VALUE = "ads_enabled_production" // Valor de Firebase (ads_enabled_production)
+    private val KEY_ADS_LOCAL_ACTIVATED = "ads_local_activated"       // ⭐️ NUEVA CLAVE: Estado de activación permanente ⭐️
+
     // Panel de Detalles
     private lateinit var btnVerDetalles: Button
     private lateinit var layoutDetalles: View
@@ -58,8 +67,6 @@ class MainActivity : AppCompatActivity() {
     private lateinit var tvDetalleExtras: TextView
 
     // ⭐️ VARIABLE PARA ALMACENAR EL DESGLOSE DE CÁLCULO ⭐️
-    // ⚠️ Nota: Esta clase CostDetail debe ser accesible
-    // Si no tienes la clase CostDetail, el código de desglose no funcionará
     data class CostDetail(val description: String, val amount: Float)
     private var lastCalculationDetails: MutableList<CostDetail> = mutableListOf()
 
@@ -79,6 +86,21 @@ class MainActivity : AppCompatActivity() {
 
         // ⭐️ Inicialización del SDK de AdMob (Solo una vez) ⭐️
         MobileAds.initialize(this) {}
+
+        // ⭐️ Configuración de Firebase Remote Config ⭐️
+        val remoteConfig = Firebase.remoteConfig
+        val configSettings = remoteConfigSettings {
+            // Establecer un tiempo de caché bajo para las pruebas (0 segundos)
+            // CAMBIAR ESTO a 3600 segundos (1 hora) ANTES de ir a PRODUCCIÓN
+            minimumFetchIntervalInSeconds = 3600L
+        }
+        remoteConfig.setConfigSettingsAsync(configSettings)
+
+        // ✅ CORRECCIÓN AQUÍ: Usamos KEY_ADS_FIREBASE_VALUE ✅
+        // Establecer valor predeterminado (Si Firebase no está disponible, el valor es FALSE)
+        val defaults = mapOf(KEY_ADS_FIREBASE_VALUE to false)
+        remoteConfig.setDefaultsAsync(defaults)
+
 
         enableEdgeToEdge()
         setContentView(R.layout.activity_main)
@@ -112,13 +134,18 @@ class MainActivity : AppCompatActivity() {
         distanciaLocalET.setText("0")
         distanciaEntregaET.setText("0")
 
-        if (IS_ADMIN_BUILD) {
-            btnAdminAccess.visibility = View.VISIBLE
-        }
+        // Nota: IS_ADMIN_BUILD debe estar accesible globalmente o definida aquí para que compile.
+        // Asumiendo que está definida en Constants.kt.
+        // if (IS_ADMIN_BUILD) {
+        //     btnAdminAccess.visibility = View.VISIBLE
+        // }
 
         // ⭐️ 3. LÓGICA DE CARGA DEL BANNER (Añadido) ⭐️
         val adRequest = AdRequest.Builder().build()
         adView.loadAd(adRequest)
+
+        // ⭐️ Llamada inicial para aplicar la regla de Firebase ⭐️
+        applyFirebaseAdConfig()
 
 
         // 4. Listeners de Foco
@@ -424,6 +451,62 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private fun applyFirebaseAdConfig() {
+        val sharedPref = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+
+        // ⭐️ 1. VERIFICACIÓN LOCAL RÁPIDA (OPTIMIZACIÓN DE CONSUMO CERO) ⭐️
+        // Si ya está activo localmente, saltamos el fetch de Firebase.
+        val isLocallyActivated = sharedPref.getBoolean(KEY_ADS_LOCAL_ACTIVATED, false)
+        if (isLocallyActivated) {
+            if (::adView.isInitialized) {
+                adView.visibility = View.VISIBLE
+                adView.resume()
+            }
+            return // ⬅️ SALIMOS: Se utiliza la caché local, no hay consumo de Firebase.
+        }
+
+        // ------------------------------------------------------------------
+        // SI NO ESTÁ ACTIVO LOCALMENTE, PROCEDEMOS AL FETCH DE FIREBASE
+        // ------------------------------------------------------------------
+
+        val remoteConfig = Firebase.remoteConfig
+
+        // Nota: La configuración de fetch interval debe estar en onCreate, pero
+        // el fetchAndActivate se hace aquí.
+
+        remoteConfig.fetchAndActivate()
+            .addOnCompleteListener(this) { task ->
+                if (task.isSuccessful) {
+                    // 2. Leemos el valor del parámetro 'ads_enabled_production'
+                    val isAdsEnabledByFirebase = remoteConfig.getBoolean(KEY_ADS_FIREBASE_VALUE)
+
+                    if (::adView.isInitialized) {
+                        if (isAdsEnabledByFirebase) {
+
+                            // ⭐️ 3. ACTIVACIÓN Y ALMACENAMIENTO PERMANENTE ⭐️
+                            // Si Firebase lo habilitó (es TRUE), lo guardamos localmente
+                            sharedPref.edit().putBoolean(KEY_ADS_LOCAL_ACTIVATED, true).apply()
+
+                            adView.visibility = View.VISIBLE
+                            adView.resume()
+                        } else {
+                            // El valor de Firebase aún es 'false'
+                            adView.visibility = View.GONE
+                            adView.pause()
+                        }
+                    }
+                } else {
+                    // Si la conexión falla, se mantiene el estado por defecto (apagado)
+                    // y se registra el fallo para debug.
+                    Log.e("FirebaseConfig", "Fetch fallido: ${task.exception?.message}")
+                    if (::adView.isInitialized) {
+                        adView.visibility = View.GONE
+                        adView.pause()
+                    }
+                }
+            }
+    }
+
     // -------------------------------------------------------------
     // ⭐️ LÓGICA DE PANEL EXPANDIBLE ⭐️
     // -------------------------------------------------------------
@@ -504,6 +587,9 @@ class MainActivity : AppCompatActivity() {
         // ⭐️ RECARGAMOS las tarifas por si ConfigActivity las actualizó
         RateManager.loadRates(this)
         leerYMostrarConfiguracion()
+
+        // ⭐️ Llamamos a la configuración de Firebase para refrescar si es necesario
+        applyFirebaseAdConfig()
 
         // ⭐️ Reanudar el banner solo si está visible
         if (::adView.isInitialized && adView.visibility == View.VISIBLE) {
