@@ -51,7 +51,6 @@ class MainActivity : AppCompatActivity() {
     private lateinit var btnSettings: ImageButton
     private lateinit var tvCiudad: TextView
     private lateinit var tvGrupo: TextView
-    private lateinit var btnAdminAccess: Button
 
     private lateinit var adView: AdView // ⭐️ DECLARACIÓN DEL BANNER ⭐️
 
@@ -120,7 +119,6 @@ class MainActivity : AppCompatActivity() {
         tvGrupo = findViewById(R.id.tVGrupo)
 
         // Vinculación de AdView y botones de Navegación/Admin
-        btnAdminAccess = findViewById(R.id.btnAdminAccess)
         btnVerDetalles = findViewById(R.id.btnVerDetalles)
         layoutDetalles = findViewById(R.id.layoutDetalles)
         tvDetalleBase = findViewById(R.id.tvDetalleBase)
@@ -137,7 +135,6 @@ class MainActivity : AppCompatActivity() {
         // Nota: IS_ADMIN_BUILD debe estar accesible globalmente o definida aquí para que compile.
         // Asumiendo que está definida en Constants.kt.
         // if (IS_ADMIN_BUILD) {
-        //     btnAdminAccess.visibility = View.VISIBLE
         // }
 
         // ⭐️ 3. LÓGICA DE CARGA DEL BANNER (Añadido) ⭐️
@@ -180,10 +177,7 @@ class MainActivity : AppCompatActivity() {
             startActivity(intent)
         }
 
-        btnAdminAccess.setOnClickListener {
-            val intent = Intent(this, AdminActivity::class.java)
-            startActivity(intent)
-        }
+
 
         // LISTENER DEL BOTÓN DE DETALLES
         btnVerDetalles.setOnClickListener {
