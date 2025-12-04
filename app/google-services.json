@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "75450044757",
+    "firebase_url": "https://calculaya-a709a-default-rtdb.firebaseio.com",
+    "project_id": "calculaya-a709a",
+    "storage_bucket": "calculaya-a709a.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:75450044757:android:d649dece6a8120bdea5fdc",
+        "android_client_info": {
+          "package_name": "com.PatagonicApps.calculaya"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD7m2BRMtJ05WgPtoBOfbjqZJuh_PqJlP4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

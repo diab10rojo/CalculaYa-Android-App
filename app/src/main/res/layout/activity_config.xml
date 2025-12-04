@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="24dp"
+    android:gravity="center_horizontal"
+    tools:context=".ConfigActivity">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="CONFIGURACIÓN DE TARIFAS"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:layout_marginBottom="32dp"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:layout_marginBottom="24dp">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Ciudad Predeterminada:"
+            android:textSize="16sp"/>
+
+        <Spinner
+            android:id="@+id/spinnerCiudadConfig"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:spinnerMode="dropdown"/>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:layout_marginBottom="40dp">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Grupo de Costos (1-8):"
+            android:textSize="16sp"/>
+
+        <Spinner
+            android:id="@+id/spinnerGrupoConfig"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:spinnerMode="dropdown"/>
+    </LinearLayout>
+
+    <Button
+        android:id="@+id/btnGuardarConfig"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="GUARDAR CONFIGURACIÓN"
+        android:paddingHorizontal="30dp"/>
+
+    <ProgressBar
+        android:id="@+id/progressBarConfig"
+        style="?android:attr/progressBarStyle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:visibility="gone"
+        />
+
+</LinearLayout>
