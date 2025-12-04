@@ -63,6 +63,9 @@ dependencies {
     implementation(libs.androidx.constraintlayout)
     implementation(libs.androidx.preference)
 
+    //Para utilizar admob
+    implementation("com.google.android.gms:play-services-ads:22.6.0")
+
     // Dependencias de testing
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

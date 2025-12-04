@@ -22,6 +22,11 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.CalculaYa"
         tools:targetApi="31">
+
+        <meta-data
+            android:name="com.google.android.gms.ads.APPLICATION_ID"
+            android:value="ca-app-pub-6378961597427920~1407495138"/>
+
         <activity
             android:name=".AdminActivity"
             android:exported="false" />

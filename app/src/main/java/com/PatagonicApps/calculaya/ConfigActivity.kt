@@ -2,6 +2,7 @@ package com.PatagonicApps.calculaya
 
 import android.content.Context
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.widget.ArrayAdapter
 import android.widget.Button
@@ -14,9 +15,16 @@ import com.google.firebase.storage.FirebaseStorage
 import com.google.android.gms.tasks.Task
 import java.io.File
 import java.nio.charset.Charset
-import kotlin.math.abs // Importación necesaria para la tolerancia de flotantes
+import kotlin.math.abs
 
-// ⭐️ Importaciones de Constantes ⭐️
+// ⭐️ Importaciones de AdMob ⭐️
+import com.google.android.gms.ads.AdRequest
+import com.google.android.gms.ads.FullScreenContentCallback
+import com.google.android.gms.ads.LoadAdError
+import com.google.android.gms.ads.interstitial.InterstitialAd
+import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback
+
+// Importaciones de Constantes
 import com.PatagonicApps.calculaya.PREFS_NODE_KEY
 import com.PatagonicApps.calculaya.RateManager.RATES_FILE_NAME
 import com.PatagonicApps.calculaya.RateManager.RATES_FILE_OLD_NAME
@@ -32,10 +40,19 @@ class ConfigActivity : AppCompatActivity() {
     private lateinit var btnGuardarConfig: Button
     private lateinit var progressBar: ProgressBar
 
+    // ⭐️ Variable del Anuncio Intersticial ⭐️
+    private var mInterstitialAd: InterstitialAd? = null
+
+    // ⭐️ Constantes para el Intersticial ⭐️
+    private val AD_COUNTER_KEY = "AdDisplayCounter"
+    private val FREQUENCY_LIMIT = 2 // Mostrará el anuncio cada 3 veces que se ejecute la acción.
+    // ID de prueba de Google. RECUERDA: REEMPLAZA ESTO con tu ID REAL antes de publicar.
+    private val INTERSTITIAL_AD_UNIT_ID = "ca-app-pub-3940256099942544/1033173712"
+
     // Nodo de lectura dinámico: 'produccion' para usuarios, 'prueba' para el admin
     private var readNode: String = "produccion"
 
-    // La lista de nombres de ciudades se ordena alfabéticamente (Opción más limpia)
+    // La lista de nombres de ciudades se ordena alfabéticamente
     private val nombresCiudades: List<String>
         get() = RateManager.listaCiudades
             .map { it.nombre }
@@ -46,7 +63,7 @@ class ConfigActivity : AppCompatActivity() {
     // Constantes de persistencia (SharedPreferences)
     private val PREFS_NAME = "AppConfig"
     private val RATE_VERSION_KEY = "TarifaVersionLocal"
-    private val RATE_VERSION_HISTORICAL_KEY = "TarifaVersionHistorical" // Seguimiento de la versión antigua
+    private val RATE_VERSION_HISTORICAL_KEY = "TarifaVersionHistorical"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -69,11 +86,117 @@ class ConfigActivity : AppCompatActivity() {
         setupSpinners()
         checkAndDownloadRates()
 
-        // 5. Listener para guardar la configuración de usuario
+        // ⭐️ 5. PRE-CARGAR el anuncio intersticial ⭐️
+        loadInterstitialAd()
+
+        // 6. Listener para guardar la configuración de usuario
         btnGuardarConfig.setOnClickListener {
-            saveConfig()
+            // Llama a la lógica de guardado que ahora maneja el intersticial
+            saveConfigAndCheckAd()
         }
     }
+
+    // -------------------------------------------------------------
+    // ⭐️ LÓGICA DE INTERSTICIAL ⭐️
+    // -------------------------------------------------------------
+
+    /**
+     * Pre-carga el anuncio intersticial. Se llama en onCreate.
+     */
+    private fun loadInterstitialAd() {
+        val adRequest = AdRequest.Builder().build()
+
+        InterstitialAd.load(this, INTERSTITIAL_AD_UNIT_ID, adRequest,
+            object : InterstitialAdLoadCallback() {
+                override fun onAdFailedToLoad(adError: LoadAdError) {
+                    Log.d("AdMob", "Fallo al cargar anuncio: ${adError.message}")
+                    mInterstitialAd = null
+                }
+
+                override fun onAdLoaded(interstitialAd: InterstitialAd) {
+                    Log.d("AdMob", "Anuncio cargado.")
+                    mInterstitialAd = interstitialAd
+                }
+            }
+        )
+    }
+
+    /**
+     * Muestra el anuncio si el contador lo permite.
+     */
+    private fun checkAndShowInterstitialOnSave() {
+        val sharedPref = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        var count = sharedPref.getInt(AD_COUNTER_KEY, 0)
+
+        // 1. Incrementa el contador para la próxima vez
+        count++
+
+        if (count >= FREQUENCY_LIMIT && mInterstitialAd != null) {
+            // 2. Si el contador llegó al límite Y el anuncio está cargado, lo mostramos
+
+            // Define el Callback para saber cuándo termina el anuncio
+            mInterstitialAd?.fullScreenContentCallback = object: FullScreenContentCallback() {
+                override fun onAdDismissedFullScreenContent() {
+                    Log.d("AdMob", "Anuncio cerrado por el usuario.")
+                    mInterstitialAd = null
+                    // ⭐️ CONTINÚA el flujo después de que el usuario cierra el anuncio ⭐️
+                    finishActivityFlow()
+                }
+
+                override fun onAdFailedToShowFullScreenContent(adError: com.google.android.gms.ads.AdError) {
+                    Log.d("AdMob", "Fallo al mostrar anuncio.")
+                    mInterstitialAd = null
+                    // ⭐️ CONTINÚA el flujo si falla al mostrarse ⭐️
+                    finishActivityFlow()
+                }
+            }
+
+            mInterstitialAd?.show(this)
+
+            // 3. Reinicia el contador
+            count = 0
+
+            // 4. Pre-carga un nuevo anuncio para el próximo intento
+            loadInterstitialAd()
+        } else {
+            // Si no se cumple la condición o el anuncio no está listo, saltamos el anuncio
+            finishActivityFlow()
+        }
+
+        // 5. Guarda el nuevo valor del contador
+        sharedPref.edit().putInt(AD_COUNTER_KEY, count).apply()
+    }
+
+    /**
+     * Finaliza la actividad y regresa a MainActivity.
+     */
+    private fun finishActivityFlow() {
+        Toast.makeText(this, "Configuración guardada.", Toast.LENGTH_SHORT).show()
+        finish()
+    }
+
+    // -------------------------------------------------------------
+    // ⭐️ FUNCIÓN DE GUARDADO (Ahora llama a la lógica del anuncio) ⭐️
+    // -------------------------------------------------------------
+
+    private fun saveConfigAndCheckAd() {
+        val ciudadSeleccionada = spinnerCiudad.selectedItem.toString()
+        val grupoSeleccionado = spinnerGrupo.selectedItem.toString()
+
+        // Guarda las preferencias del usuario
+        getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE).edit().apply {
+            putString("CiudadSeleccionada", ciudadSeleccionada)
+            putString("GrupoSeleccionado", grupoSeleccionado)
+            apply()
+        }
+
+        // ⭐️ Llama al chequeo de AdMob. finish() se ejecuta dentro de esta función. ⭐️
+        checkAndShowInterstitialOnSave()
+    }
+
+    // -------------------------------------------------------------
+    // ... EL RESTO DEL CÓDIGO PERMANECE IGUAL ...
+    // -------------------------------------------------------------
 
     private fun loadReadNodeConfig() {
         // Lee el nodo de Firebase ('produccion' o 'prueba') seleccionado por el administrador.
@@ -108,24 +231,9 @@ class ConfigActivity : AppCompatActivity() {
         if (groupIndex >= 0) spinnerGrupo.setSelection(groupIndex)
     }
 
-    private fun saveConfig() {
-        val ciudadSeleccionada = spinnerCiudad.selectedItem.toString()
-        // ⭐️ CORRECCIÓN CRÍTICA: Lee el valor del spinnerGrupo ⭐️
-        val grupoSeleccionado = spinnerGrupo.selectedItem.toString()
-
-        // Guarda las preferencias del usuario
-        getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE).edit().apply {
-            putString("CiudadSeleccionada", ciudadSeleccionada)
-            putString("GrupoSeleccionado", grupoSeleccionado)
-            apply()
-        }
-
-        Toast.makeText(this, "Configuración guardada.", Toast.LENGTH_SHORT).show()
-        finish()
-    }
 
     // -------------------------------------------------------------
-    // ⭐️ LÓGICA AVANZADA DE SINCRONIZACIÓN Y DESCARGA CONDICIONAL ⭐️
+    // LÓGICA AVANZADA DE SINCRONIZACIÓN Y DESCARGA CONDICIONAL
     // -------------------------------------------------------------
 
     private fun checkAndDownloadRates() {
@@ -142,7 +250,7 @@ class ConfigActivity : AppCompatActivity() {
                 val remoteActualVersion = snapshot.child("version_actual").getValue(Double::class.java) ?: 0.0
                 val remoteHistoricalVersion = snapshot.child("version_historica").getValue(Double::class.java) ?: 0.0
 
-                // ⭐️ TOLERANCIA: Usamos 0.001 para evitar errores de precisión de punto flotante ⭐️
+                // TOLERANCIA: Usamos 0.001 para evitar errores de precisión de punto flotante
                 val tolerance = 0.001
                 val areVersionsPracticallyEqual = abs(remoteActualVersion - localActualVersion) < tolerance
 
@@ -156,7 +264,7 @@ class ConfigActivity : AppCompatActivity() {
                 val needsPromotion = abs(remoteHistoricalVersion - localActualVersion) < tolerance
 
                 if (needsPromotion) {
-                    // ➡️ CASO 1: V_H == L_A (Ej. 1.5 == 1.5). Solo movemos el archivo y descargamos el nuevo.
+                    // ➡️ CASO 1: V_H == L_A. Solo movemos el archivo y descargamos el nuevo.
                     promoteAndPerformSingleDownload(remoteActualVersion, remoteHistoricalVersion)
                     return
                 }
@@ -165,7 +273,7 @@ class ConfigActivity : AppCompatActivity() {
                 val isLocalHistoricalCorrect = abs(remoteHistoricalVersion - localHistoricalVersion) < tolerance
 
                 if (isLocalHistoricalCorrect) {
-                    // ➡️ CASO 2: INTEGRIDAD OK. L_H (1.4) == V_H (1.4). Solo descargamos V_A (1.7).
+                    // ➡️ CASO 2: INTEGRIDAD OK. Solo descargamos V_A.
                     performSingleDownload(remoteActualVersion)
                     return
                 }
@@ -188,9 +296,7 @@ class ConfigActivity : AppCompatActivity() {
         })
     }
 
-    // ----------------------------------------------------------------------
     // FUNCIÓN: Maneja la descarga doble si hay salto de versión o instalación limpia
-    // ----------------------------------------------------------------------
     private fun performConditionalDoubleDownload(remoteHistoricalVersion: Double, localHistoricalVersion: Double, actualVersion: Double) {
 
         // La descarga es necesaria porque la versión local es anterior al historial remoto.
@@ -219,9 +325,7 @@ class ConfigActivity : AppCompatActivity() {
         }
     }
 
-    // ----------------------------------------------------------------------
     // FUNCIÓN: Promoción Local Eficiente (Copia local y descarga única)
-    // ----------------------------------------------------------------------
     private fun promoteAndPerformSingleDownload(remoteActualVersion: Double, remoteHistoricalVersion: Double) {
         val currentFile = File(applicationContext.filesDir, RATES_FILE_NAME)
         val oldFile = File(applicationContext.filesDir, RATES_FILE_OLD_NAME)
@@ -242,9 +346,7 @@ class ConfigActivity : AppCompatActivity() {
         performSingleDownload(remoteActualVersion)
     }
 
-    // ----------------------------------------------------------------------
     // FUNCIÓN: Descarga Única (Actualización Normal)
-    // ----------------------------------------------------------------------
     private fun performSingleDownload(actualVersion: Double) {
         val actualVersionString = String.format("%.1f", actualVersion)
         val actualFileName = "tarifas_v$actualVersionString.json"
@@ -253,9 +355,7 @@ class ConfigActivity : AppCompatActivity() {
     }
 
 
-    // ----------------------------------------------------------------------
     // FUNCIÓN DE DESCARGA GENÉRICA (Maneja la conexión a Storage)
-    // ----------------------------------------------------------------------
     private fun downloadFile(remoteFileName: String, localFileName: String, newVersion: Double): Task<*> {
         val readNode = readNode
         val storageRef = FirebaseStorage.getInstance().reference
@@ -292,9 +392,7 @@ class ConfigActivity : AppCompatActivity() {
             }
     }
 
-    // ----------------------------------------------------------------------
     // FUNCIÓN DE FINALIZACIÓN (Llamada al final de cualquier descarga de RATES_FILE_NAME)
-    // ----------------------------------------------------------------------
     private fun onRatesCheckCompleted(success: Boolean, message: String) {
         progressBar.visibility = View.GONE
         btnGuardarConfig.isEnabled = true

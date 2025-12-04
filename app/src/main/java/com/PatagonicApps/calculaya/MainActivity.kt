@@ -19,14 +19,16 @@ import com.jakewharton.threetenabp.AndroidThreeTen
 import org.threeten.bp.LocalDateTime
 import org.threeten.bp.DayOfWeek
 import org.threeten.bp.format.DateTimeFormatter
+import com.google.android.gms.ads.MobileAds
+import com.google.android.gms.ads.AdRequest
+import com.google.android.gms.ads.AdView
 import kotlin.math.min
-
-// ⭐️ NECESARIO PARA FORMATO BOLD Y SALTO DE LÍNEA HTML ⭐️
 import android.text.Html
 import android.os.Build
 
 // La constante IS_ADMIN_BUILD debe estar definida en Constants.kt
-
+// Usamos CostDetail solo si está definida en otro archivo.
+// Asumiendo que tienes una data class CostDetail(val description: String, val amount: Float)
 
 /**
  * Activity Principal: Contiene la interfaz de la calculadora y el motor de tarifas.
@@ -46,14 +48,19 @@ class MainActivity : AppCompatActivity() {
     private lateinit var tvGrupo: TextView
     private lateinit var btnAdminAccess: Button
 
-    // ⭐️ DECLARACIONES PARA EL PANEL DE DETALLES (Desglose) ⭐️
+    private lateinit var adView: AdView // ⭐️ DECLARACIÓN DEL BANNER ⭐️
+
+    // Panel de Detalles
     private lateinit var btnVerDetalles: Button
     private lateinit var layoutDetalles: View
-    private lateinit var tvDetalleBase: TextView // Contiene el desglose final
+    private lateinit var tvDetalleBase: TextView
     private lateinit var tvDetalleTramos: TextView
     private lateinit var tvDetalleExtras: TextView
 
-    // ⭐️ VARIABLE PARA ALMACENAR EL DESGLOSE DE CÁLCULO (lastCalculationDetails) ⭐️
+    // ⭐️ VARIABLE PARA ALMACENAR EL DESGLOSE DE CÁLCULO ⭐️
+    // ⚠️ Nota: Esta clase CostDetail debe ser accesible
+    // Si no tienes la clase CostDetail, el código de desglose no funcionará
+    data class CostDetail(val description: String, val amount: Float)
     private var lastCalculationDetails: MutableList<CostDetail> = mutableListOf()
 
 
@@ -69,6 +76,9 @@ class MainActivity : AppCompatActivity() {
         } catch (e: Exception) {
             // Ignorar si ya está inicializado
         }
+
+        // ⭐️ Inicialización del SDK de AdMob (Solo una vez) ⭐️
+        MobileAds.initialize(this) {}
 
         enableEdgeToEdge()
         setContentView(R.layout.activity_main)
@@ -87,13 +97,15 @@ class MainActivity : AppCompatActivity() {
         tvCiudad = findViewById(R.id.tVCiudad)
         tvGrupo = findViewById(R.id.tVGrupo)
 
-        // Vinculación de botones y panel de detalles
+        // Vinculación de AdView y botones de Navegación/Admin
         btnAdminAccess = findViewById(R.id.btnAdminAccess)
         btnVerDetalles = findViewById(R.id.btnVerDetalles)
         layoutDetalles = findViewById(R.id.layoutDetalles)
         tvDetalleBase = findViewById(R.id.tvDetalleBase)
         tvDetalleTramos = findViewById(R.id.tvDetalleTramos)
         tvDetalleExtras = findViewById(R.id.tvDetalleExtras)
+
+        adView = findViewById(R.id.adViewBannerBottom) // ⭐️ VINCULACIÓN DEL BANNER ⭐️
 
 
         // Configuraciones de inicio y Lógica de visibilidad
@@ -104,7 +116,12 @@ class MainActivity : AppCompatActivity() {
             btnAdminAccess.visibility = View.VISIBLE
         }
 
-        // 3. Listeners de Foco (Limpia el "0" al empezar a escribir para evitar "01")
+        // ⭐️ 3. LÓGICA DE CARGA DEL BANNER (Añadido) ⭐️
+        val adRequest = AdRequest.Builder().build()
+        adView.loadAd(adRequest)
+
+
+        // 4. Listeners de Foco
         distanciaLocalET.setOnFocusChangeListener { _, hasFocus ->
             if (hasFocus) {
                 activeEditText = distanciaLocalET
@@ -130,7 +147,7 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        // 4. Configuración de Botones de Navegación
+        // 5. Configuración de Botones de Navegación
         btnSettings.setOnClickListener {
             val intent = Intent(this, ConfigActivity::class.java)
             startActivity(intent)
@@ -141,13 +158,13 @@ class MainActivity : AppCompatActivity() {
             startActivity(intent)
         }
 
-        // ⭐️ LISTENER DEL BOTÓN DE DETALLES (Expande/Contrae el desglose) ⭐️
+        // LISTENER DEL BOTÓN DE DETALLES
         btnVerDetalles.setOnClickListener {
             toggleDetallesPanel()
         }
 
 
-        // Lógica de los botones +/- (Touch Listeners) ... [Tu código existente]
+        // Lógica de los botones +/- (Touch Listeners) ...
         botonMas.setOnTouchListener { view, event ->
             when (event.action) {
                 MotionEvent.ACTION_DOWN -> {
@@ -470,7 +487,7 @@ class MainActivity : AppCompatActivity() {
             Html.fromHtml(builder.toString().trim())
         }
 
-        // Mostramos todo el desglose en el tvDetalleBase.
+        // Mostramos todo el desglose en el TextView principal (tvDetalleBase).
         tvDetalleBase.text = htmlText
 
         // Ocultamos los otros TextViews ya que todo el desglose está en tvDetalleBase
@@ -487,6 +504,27 @@ class MainActivity : AppCompatActivity() {
         // ⭐️ RECARGAMOS las tarifas por si ConfigActivity las actualizó
         RateManager.loadRates(this)
         leerYMostrarConfiguracion()
+
+        // ⭐️ Reanudar el banner solo si está visible
+        if (::adView.isInitialized && adView.visibility == View.VISIBLE) {
+            adView.resume()
+        }
+    }
+
+    override fun onPause() {
+        super.onPause()
+        // ⭐️ Pausar el banner al pasar a segundo plano
+        if (::adView.isInitialized) {
+            adView.pause()
+        }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        // ⭐️ Liberar recursos del banner al destruir la Activity
+        if (::adView.isInitialized) {
+            adView.destroy()
+        }
     }
 
     private fun leerYMostrarConfiguracion() {
