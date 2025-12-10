@@ -235,6 +235,7 @@
                 android:layout_height="wrap_content"
                 android:text="VER DETALLES"
                 android:visibility="gone"
+                android:textColor="@color/white"
                 android:layout_marginTop="5dp"
                 android:backgroundTint="@color/design_default_color_secondary_variant"/>
 
