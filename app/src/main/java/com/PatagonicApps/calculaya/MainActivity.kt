@@ -136,9 +136,9 @@ class MainActivity : AppCompatActivity() {
 
         // Nota: IS_ADMIN_BUILD debe estar accesible globalmente o definida aquí para que compile.
         // Asumiendo que está definida en Constants.kt.
-        // if (IS_ADMIN_BUILD) {
-        //     btnAdminAccess.visibility = View.VISIBLE
-        // }
+        if (IS_ADMIN_BUILD) {
+             btnAdminAccess.visibility = View.VISIBLE
+        }
 
         // ⭐️ 3. LÓGICA DE CARGA DEL BANNER (Añadido) ⭐️
         val adRequest = AdRequest.Builder().build()

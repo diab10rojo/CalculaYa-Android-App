@@ -12,17 +12,17 @@ val listaCiudades = listOf(
     ),
 
     Ciudad(
-        nombre = "Gba Oeste",
-        extraPEGrupo1 = 220,
-        extraPEGrupo2 = 135,
-        extraPEGrupo3 = 80,
-        extraPEGrupo4 = 40,
+        nombre = "CABA",
 
-        tramo1Entrega =185,
-        tramo2Entrega =330,
-        tramo3Entrega =540,
-        tramo4Entrega =610,
-    ),
+        tramo1Retiro =190,
+        tramo2Retiro =345,
+        tramo3Retiro =570,
+        tramo4Retiro =640,
+        tramo1Entrega =190,
+        tramo2Entrega =345,
+        tramo3Entrega =570,
+        tramo4Entrega =640,
+        ),
     Ciudad(
         nombre = "Zona Norte",
         tramo1Retiro =190,
@@ -33,9 +33,8 @@ val listaCiudades = listOf(
         tramo2Entrega =345,
         tramo3Entrega =570,
         tramo4Entrega =640,
-
-
-
     )
+
+
 )
 
