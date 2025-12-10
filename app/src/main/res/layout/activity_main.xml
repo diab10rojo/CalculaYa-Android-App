@@ -45,6 +45,10 @@
                     android:text="CalculaYa"
                     android:textSize="30dp"
                     android:textStyle="bold"
+                    android:shadowColor="@color/white"
+                    android:shadowDx="2"
+                    android:shadowDy="2"
+                    android:shadowRadius="4"
                     android:textColor="@color/black"/>
 
                 <ImageButton
@@ -235,6 +239,7 @@
                 android:layout_height="wrap_content"
                 android:text="VER DETALLES"
                 android:visibility="gone"
+                android:textColor="@color/white"
                 android:layout_marginTop="5dp"
                 android:backgroundTint="@color/design_default_color_secondary_variant"/>
 
@@ -247,6 +252,7 @@
                 app:cardElevation="4dp"
                 android:visibility="gone"
                 tools:visibility="visible"
+                android:layout_marginHorizontal="15dp"
                 android:layout_marginBottom="20dp"> <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"

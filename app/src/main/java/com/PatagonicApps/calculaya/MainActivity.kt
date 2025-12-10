@@ -180,10 +180,6 @@ class MainActivity : AppCompatActivity() {
             startActivity(intent)
         }
 
-        btnAdminAccess.setOnClickListener {
-            val intent = Intent(this, AdminActivity::class.java)
-            startActivity(intent)
-        }
 
         // LISTENER DEL BOTÓN DE DETALLES
         btnVerDetalles.setOnClickListener {
