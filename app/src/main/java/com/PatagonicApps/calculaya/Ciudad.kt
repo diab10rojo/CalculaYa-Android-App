@@ -47,18 +47,18 @@ data class Ciudad(
     val distancia1Retiro: Float=2f,
     val distancia2Retiro: Float=2f,
     val distancia3Retiro: Float=2f,
-    val distancia4Retiro: Float=2f,
+    val distancia4Retiro: Float=9999f,
 
     //DISTANCIAS DE ENTREGA
     val distancia1Entrega: Float=2.0f,
     val distancia2Entrega: Float=2.0f,
     val distancia3Entrega: Float=2.0f,
-    val distancia4Entrega: Float=2.0f,
+    val distancia4Entrega: Float=9999.0f,
 
 
 
     //MONTO POR KM AL PUNTO DE RETIRO
-    val tramo1Retiro: Int=215,
+    val tramo1Retiro: Int=190,
     val tramo2Retiro: Int=375,
     val tramo3Retiro: Int=585,
     val tramo4Retiro: Int=655,

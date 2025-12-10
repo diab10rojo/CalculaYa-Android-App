@@ -74,4 +74,17 @@
         android:visibility="gone"
         />
 
+    <TextView
+        android:id="@+id/tvRateStatus"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:padding="12dp"
+        android:background="#E0E0E0"
+        android:textSize="12sp"
+        android:textColor="@android:color/black"
+        android:textAlignment="viewStart"
+        android:text="Estado de la tarifa..."
+        />
+
 </LinearLayout>
