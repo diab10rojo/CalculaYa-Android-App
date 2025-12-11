@@ -378,11 +378,12 @@ class ConfigActivity : AppCompatActivity() {
             statusMessage.append("Versión: ${String.format("%.1f", localActualVersion)}\n")
         } else {
             // Este caso aplica si v0.0 o si solo se cargó el fallback de 3 ciudades
-            statusMessage.append("Versión de tarifas: ${String.format("%.1f", localActualVersion)}\n")
+            statusMessage.append("⚠️ **Estado:** Usando tarifas de emergencia.\n")
+            statusMessage.append("Versión: ${String.format("%.1f", localActualVersion)}\n")
+            statusMessage.append("Origen: Lista de fallback estática.\n")
         }
 
         // 2. Mostrar conteo
-        statusMessage.append("Version de la aplicación: 1.1\n")
         statusMessage.append("Ciudades en memoria: **$numCiudadesCargadas**.")
 
         tvRateStatus.text = statusMessage.toString()
