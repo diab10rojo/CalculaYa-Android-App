@@ -9,30 +9,27 @@ val listaCiudades = listOf(
         extraPEGrupo1 = 270,
         extraPEGrupo4 = 0,
         extraPEGrupo8 = 0,
+        tramo1Entrega = 215,
+        tramo1Retiro = 215,
+        tramo2Entrega = 375,
+        tramo2Retiro = 375,
+        tramo3Entrega = 585,
+        tramo3Retiro = 585,
+        tramo4Entrega = 655,
+        tramo4Retiro = 655
     ),
 
     Ciudad(
-        nombre = "CABA",
-
-        tramo1Retiro =190,
-        tramo2Retiro =345,
-        tramo3Retiro =570,
-        tramo4Retiro =640,
-        tramo1Entrega =190,
-        tramo2Entrega =345,
-        tramo3Entrega =570,
-        tramo4Entrega =640,
+        nombre = "CABA"
         ),
     Ciudad(
-        nombre = "Zona Norte",
-        tramo1Retiro =190,
-        tramo2Retiro =345,
-        tramo3Retiro =570,
-        tramo4Retiro =640,
-        tramo1Entrega =190,
-        tramo2Entrega =345,
-        tramo3Entrega =570,
-        tramo4Entrega =640,
+        nombre = "Zona Norte"
+    ),
+    Ciudad(
+        nombre = "Córdoba"
+    ),
+    Ciudad(
+        nombre = "GBA Oeste"
     )
 
 

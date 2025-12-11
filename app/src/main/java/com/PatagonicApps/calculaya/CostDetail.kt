@@ -1,9 +1,10 @@
 package com.PatagonicApps.calculaya
 
-/**
- * Clase de datos para almacenar el desglose de cada ítem de costo.
- */
+import androidx.annotation.Keep
+import com.google.gson.annotations.SerializedName
+
+@Keep
 data class CostDetail(
-    val description: String,
-    val amount: Float
+    @SerializedName("description") val description: String,
+    @SerializedName("amount") val amount: Float
 )
