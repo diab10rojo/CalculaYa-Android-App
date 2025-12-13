@@ -1,8 +1,6 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
-
-    // ⭐️ APLICACIÓN DEL PLUGIN DE GOOGLE SERVICES ⭐️
     id("com.google.gms.google-services")
 }
 
@@ -16,8 +14,11 @@ android {
         targetSdk = 35
         versionCode = 4
         versionName = "1.3"
-
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    buildFeatures {
+        buildConfig = true
     }
 
     buildTypes {
@@ -39,26 +40,22 @@ android {
 }
 
 dependencies {
-
-    // 1. Firebase BOM (Bill of Materials) - Fija las versiones de Firebase
+    // Firebase BOM
     implementation(platform(libs.firebase.bom))
 
-    // 2. Dependencias de Firebase (Versión controlada por el BOM)
-    implementation(libs.firebase.database.ktx)     // Control de versión de tarifas (Realtime DB)
-    implementation("com.google.firebase:firebase-storage-ktx") // Descarga del JSON (Storage)
+    // Firebase dependencias (controladas por BOM)
+    implementation(libs.firebase.database.ktx)
+    implementation("com.google.firebase:firebase-storage-ktx")
+    implementation("com.google.firebase:firebase-config-ktx") // ✅ solo KTX
 
-    // ⭐️ REMOTE CONFIG: SOLO UNA VERSIÓN (KTX) ⭐️
-    implementation("com.google.firebase:firebase-config-ktx")
-    // implementation(libs.firebase.config) <-- LÍNEA ELIMINADA POR SER REDUNDANTE/CONFLICTIVA
+    // Gson
+    implementation("com.google.code.gson:gson:2.13.2")
 
-    // 3. Librería de Serialización/Deserialización
-    implementation("com.google.code.gson:gson:2.10.1")
+    // Coroutines
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.10.2")
 
-    // 4. Coroutines (Para gestión de descargas asíncronas)
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
-
-    // 5. Librerías de la App (EXISTENTES)
+    // Librerías AndroidX
     implementation("com.jakewharton.threetenabp:threetenabp:1.4.9")
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
@@ -67,11 +64,30 @@ dependencies {
     implementation(libs.androidx.constraintlayout)
     implementation(libs.androidx.preference)
 
-    //Para utilizar admob
-    implementation("com.google.android.gms:play-services-ads:22.6.0")
+    // AdMob
+    implementation("com.google.android.gms:play-services-ads:24.9.0")
 
-    // Dependencias de testing
+    // Play Core
+    implementation("com.google.android.play:core-ktx:1.8.1")
+
+    // Testing
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
+}
+
+// ✅ Forzar versiones más recientes para evitar demociones
+configurations.all {
+    resolutionStrategy {
+        force(
+            "com.google.android.gms:play-services-ads:24.9.0",
+            "androidx.activity:activity:1.12.1",
+            "androidx.core:core-ktx:1.17.0",
+            "androidx.preference:preference:1.2.1",
+            "com.google.android.material:material:1.13.0",
+            "com.google.code.gson:gson:2.13.2",
+            "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.10.2",
+            "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2"
+        )
+    }
 }
