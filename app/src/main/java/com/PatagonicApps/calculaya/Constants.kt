@@ -5,17 +5,16 @@ package com.PatagonicApps.calculaya
  */
 
 // ⭐️ CONTROL DE ENTORNO:
-// true SOLO en desarrollo, false antes de subir a Google Play
-const val IS_ADMIN_BUILD = true
+// Debe ser 'true' SÓLO en tu versión de desarrollo para probar montos.
+// Debe ser 'false' antes de subir la app a Google Play (para que use el nodo 'control').
+const val IS_ADMIN_BUILD = false
 
-// CLAVE DE PREFERENCIA: Usada en ConfigActivity para guardar y leer qué nodo de Firebase
+// CLAVE DE PREFERENCIA: Usada en ConfigActivity para guardar y leer qué nodo de
+// Firebase (control o production) debe leer la aplicación.
 const val PREFS_NODE_KEY = "FirebaseReadNode"
 
 object Constants {
-    const val PREFS_NAME = "AppConfig"
-    const val KEY_ADS_FIREBASE_VALUE = "ads_enabled_production"
-    const val KEY_ADS_LOCAL_ACTIVATED = "ads_local_activated"
+    const val KEY_ADS_FIREBASE_VALUE = "ads_enabled"
     const val KEY_FORCE_UPDATE = "force_update_required"
-    const val KEY_MIN_VERSION_CODE = "min_version_code"   // ⭐️ NUEVA CONSTANTE
+    const val KEY_MIN_VERSION_CODE = "min_version_code"
 }
-
