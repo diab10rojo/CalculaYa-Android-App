@@ -523,8 +523,8 @@ class ConfigActivity : AppCompatActivity() {
         // Determinar origen de datos
         if (localActualVersion > 0.0f && numCiudadesCargadas > 3) {
             // Tarifas completas de Firebase
-            statusMessage.append("✅ Estado: Tarifas locales completas\n")
-            statusMessage.append("Versión: ${String.format("%.1f", localActualVersion)}\n")
+            statusMessage.append("✅ Estado: Tarifas locales actualizadas\n")
+            statusMessage.append("Versión de tarifas: ${String.format("%.1f", localActualVersion)}\n")
         } else {
             // Fallback o versión básica
             statusMessage.append("Versión: ${String.format("%.1f", localActualVersion)}\n")
