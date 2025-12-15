@@ -2,95 +2,70 @@ package com.PatagonicApps.calculaya
 
 import android.content.Context
 import android.content.Intent
+import android.graphics.Color
 import android.os.Bundle
+import android.view.Gravity
 import android.view.View
 import android.view.inputmethod.InputMethodManager
-import android.widget.Button
-import android.widget.EditText
-import android.widget.ImageButton
-import android.widget.TextView
+import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.AdView
 import java.util.Locale
 
-/**
- * Actividad principal de la aplicación CalculaYa
- *
- * Funcionalidades:
- * - Permite calcular montos de envío basados en distancias y configuración del usuario
- * - Muestra/oculta detalles del cálculo
- * - Integración con Firebase Remote Config para control de anuncios y actualizaciones
- * - Gestión de banners publicitarios (AdMob)
- */
 class MainActivity : AppCompatActivity() {
 
     // ==================== CONSTANTES ====================
-
     private val PREFS_NAME = "AppConfig"
 
     // ==================== VISTAS ====================
-
-    // Campos de entrada
     private lateinit var distanciaLocalET: EditText
     private lateinit var distanciaEntregaET: EditText
-
-    // Botones
     private lateinit var botonCalcular: Button
     private lateinit var btnSettings: ImageButton
     private lateinit var btnVerDetalles: Button
-
-    // Textos informativos
     private lateinit var textMonto: TextView
     private lateinit var tvCiudad: TextView
     private lateinit var tvGrupo: TextView
     private lateinit var tvDetalleBase: TextView
-
-    // Contenedores y publicidad
     private lateinit var layoutDetalles: androidx.cardview.widget.CardView
     private lateinit var adView: AdView
+    private lateinit var imgButtonPlus: ImageButton
+    private lateinit var imgButtonMinus: ImageView
+    private lateinit var layoutButtonsPlusMinus: LinearLayout // Contenedor de botones +/-
 
-    // ==================== ESTADO DE LA ACTIVIDAD ====================
+    // 🔹 Pedidos Agrupados
+    private lateinit var layoutExtraDeliveries: LinearLayout
+    private lateinit var btnAddDeliveryPoint: Button
+    private lateinit var radioGroupMode: RadioGroup
+    private lateinit var rbSimple: RadioButton
+    private lateinit var rbGrouped: RadioButton
 
-    // Almacena los detalles del último cálculo realizado
+    // ==================== ESTADO ====================
     private var lastCalculationDetails: List<CostDetail> = emptyList()
-
-    // Controla si el panel de detalles está visible u oculto
     private var detallesVisibles = false
+    private var isGroupMode = false
+    private var lastFocusedEditText: EditText? = null // Para saber qué campo modificar con +/-
 
     // ==================== CICLO DE VIDA ====================
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        // Inicializar configuración remota de Firebase
         RemoteConfigHelper.init()
-
-        // Vincular todas las vistas del layout con las variables
         initializeViews()
-
-        // Cargar banner publicitario inicial
         adView.loadAd(AdRequest.Builder().build())
-
-        // Cargar tarifas desde Firebase (necesario si es la primera vez que se abre la app)
         RateManager.loadRates(this)
-
-        // Obtener configuración remota y aplicar reglas de anuncios/actualizaciones
         fetchRemoteConfig()
-
-        // Configurar listeners de los botones
         setupListeners()
     }
 
     override fun onResume() {
         super.onResume()
-        // Actualizar la UI con la configuración guardada del usuario cada vez que vuelve a la actividad
         loadUserConfig()
     }
 
     // ==================== INICIALIZACIÓN ====================
-
     private fun initializeViews() {
         distanciaLocalET = findViewById(R.id.editTextDistanciaLocal)
         distanciaEntregaET = findViewById(R.id.editTextDistanciaEntrega)
@@ -103,10 +78,24 @@ class MainActivity : AppCompatActivity() {
         adView = findViewById(R.id.adViewBannerBottom)
         layoutDetalles = findViewById(R.id.layoutDetalles)
         tvDetalleBase = findViewById(R.id.tvDetalleBase)
+        imgButtonPlus = findViewById(R.id.imgButtonPlus)
+        imgButtonMinus = findViewById(R.id.imgButtonMinus)
+        // Buscamos el LinearLayout padre de los botones +/-. Como no tiene ID en el XML,
+        // asumimos que es el padre directo de imgButtonPlus.
+        layoutButtonsPlusMinus = imgButtonPlus.parent.parent as LinearLayout
+
+        // 🔹 nuevos
+        layoutExtraDeliveries = findViewById(R.id.layoutExtraDeliveries)
+        btnAddDeliveryPoint = findViewById(R.id.btnAddDeliveryPoint)
+        radioGroupMode = findViewById(R.id.radioGroupMode)
+        rbSimple = findViewById(R.id.rbSimple)
+        rbGrouped = findViewById(R.id.rbGrouped)
+
+        // Inicializamos el foco en el campo de entrega principal
+        lastFocusedEditText = distanciaEntregaET
     }
 
     // ==================== CONFIG REMOTA ====================
-
     private fun fetchRemoteConfig() {
         RemoteConfigHelper.fetchAndActivate {
             AdsManager.showBanner(adView, RemoteConfigHelper.isAdsEnabled())
@@ -121,30 +110,168 @@ class MainActivity : AppCompatActivity() {
     }
 
     // ==================== LISTENERS ====================
-
     private fun setupListeners() {
-        // Botón de cálculo: obtiene valores y calcula el monto estimado
+        // Rastrear foco para saber qué campo editar
+        val focusListener = View.OnFocusChangeListener { v, hasFocus ->
+            if (hasFocus && v is EditText) {
+                lastFocusedEditText = v
+            }
+        }
+        distanciaLocalET.onFocusChangeListener = focusListener
+        distanciaEntregaET.onFocusChangeListener = focusListener
+
+        // Botón Calcular Único
         botonCalcular.setOnClickListener {
-            performCalculation()
-            hideKeyboard() // 🔹 cerrar teclado al calcular
+            if (isGroupMode) {
+                performGroupedCalculation()
+            } else {
+                performSimpleCalculation()
+            }
+            hideKeyboard()
         }
 
-        // Botón de detalles: alterna entre mostrar/ocultar el desglose del cálculo
+        // Cambio de Modo (Simple <-> Agrupado) mediante RadioGroup
+        radioGroupMode.setOnCheckedChangeListener { _, checkedId ->
+            isGroupMode = (checkedId == R.id.rbGrouped)
+            toggleGroupModeUI()
+        }
+
+        // Agregar nuevo punto de entrega (solo en modo agrupado)
+        btnAddDeliveryPoint.setOnClickListener {
+            addExtraDeliveryField()
+        }
+
         btnVerDetalles.setOnClickListener {
             toggleDetailsPanel()
         }
 
-        // Botón de configuración: abre la pantalla de ajustes
         btnSettings.setOnClickListener {
             startActivity(Intent(this, ConfigActivity::class.java))
+        }
+        
+        // Listeners para los botones + y -
+        imgButtonPlus.setOnClickListener {
+            incrementDistancia()
+        }
+        
+        imgButtonMinus.setOnClickListener {
+           decrementDistancia()
+        }
+    }
+
+    // ==================== UI LOGIC ====================
+    private fun toggleGroupModeUI() {
+        if (isGroupMode) {
+            layoutExtraDeliveries.visibility = View.VISIBLE
+            btnAddDeliveryPoint.visibility = View.VISIBLE
+            layoutButtonsPlusMinus.visibility = View.GONE // Ocultar botones +/-
+            
+            // Si no hay campos extra, agregamos uno por defecto para que sea obvio
+            if (layoutExtraDeliveries.childCount == 0) {
+                addExtraDeliveryField()
+            }
+        } else {
+            layoutExtraDeliveries.visibility = View.GONE
+            btnAddDeliveryPoint.visibility = View.GONE
+            layoutExtraDeliveries.removeAllViews() // Limpiamos los campos extra al volver a simple
+            layoutButtonsPlusMinus.visibility = View.VISIBLE // Mostrar botones +/-
+            
+            // Resetear foco al principal al volver
+            lastFocusedEditText = distanciaEntregaET
+        }
+    }
+
+    private fun addExtraDeliveryField() {
+        val count = layoutExtraDeliveries.childCount + 2 // +2 porque el 1 es el principal
+
+        val container = LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+            gravity = Gravity.CENTER
+            layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                40.dpToPx() // Altura fija de 40dp
+            ).apply {
+                // Margen superior para separar las filas y evitar que se peguen (10dp)
+                topMargin = 10.dpToPx()
+            }
+        }
+
+        val textView = TextView(this).apply {
+            text = "Distancia al punto de entrega $count"
+            setTextColor(Color.BLACK)
+            setTypeface(null, android.graphics.Typeface.BOLD)
+            layoutParams = LinearLayout.LayoutParams(
+                180.dpToPx(), // Ancho fijo coincidente con "Distancia al Local"
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            )
+        }
+
+        val editText = EditText(this).apply {
+            inputType = android.text.InputType.TYPE_CLASS_NUMBER or android.text.InputType.TYPE_NUMBER_FLAG_DECIMAL
+            setTextColor(Color.BLACK)
+            setBackgroundColor(Color.WHITE)
+            gravity = Gravity.CENTER
+            setTypeface(null, android.graphics.Typeface.BOLD)
+            layoutParams = LinearLayout.LayoutParams(
+                50.dpToPx(), // Width fijo de 50dp
+                LinearLayout.LayoutParams.WRAP_CONTENT // WRAP_CONTENT para igualar altura visual
+            )
+            
+            // Rastrear foco en campos dinámicos también (aunque los botones +/- estén ocultos en este modo, 
+            // es buena práctica por si decides habilitarlos después)
+            onFocusChangeListener = View.OnFocusChangeListener { v, hasFocus ->
+                if (hasFocus && v is EditText) {
+                    lastFocusedEditText = v
+                }
+            }
+        }
+        
+        val unitTextView = TextView(this).apply {
+            text = "km"
+            setTextColor(Color.BLACK)
+            setTypeface(null, android.graphics.Typeface.BOLD)
+            layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.WRAP_CONTENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            )
+        }
+
+        container.addView(textView)
+        container.addView(editText)
+        container.addView(unitTextView)
+        layoutExtraDeliveries.addView(container)
+    }
+    
+    // Extensión para convertir dp a px
+    private fun Int.dpToPx(): Int {
+        val density = resources.displayMetrics.density
+        return (this * density).toInt()
+    }
+    
+    // ==================== OPERACIONES DE BOTONES +/- ====================
+    private fun incrementDistancia() {
+        val target = lastFocusedEditText ?: distanciaEntregaET
+        val currentText = target.text.toString()
+        val currentValue = currentText.toFloatOrNull() ?: 0f
+        val newValue = currentValue + 1
+        target.setText(String.format(Locale.US, "%.0f", newValue))
+        target.setSelection(target.text.length) // Mover cursor al final
+    }
+
+    private fun decrementDistancia() {
+        val target = lastFocusedEditText ?: distanciaEntregaET
+        val currentText = target.text.toString()
+        val currentValue = currentText.toFloatOrNull() ?: 0f
+        if (currentValue > 0) {
+            val newValue = currentValue - 1
+            target.setText(String.format(Locale.US, "%.0f", newValue))
+            target.setSelection(target.text.length) // Mover cursor al final
         }
     }
 
     // ==================== LÓGICA DE NEGOCIO ====================
-
-    private fun performCalculation() {
+    private fun performSimpleCalculation() {
         val sharedPref = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-
         val ciudad = sharedPref.getString("CiudadSeleccionada", "Trelew") ?: "Trelew"
         val grupoStr = sharedPref.getString("GrupoSeleccionado", "1") ?: "1"
         val grupo = grupoStr.toIntOrNull() ?: 1
@@ -153,11 +280,50 @@ class MainActivity : AppCompatActivity() {
         val distanciaEntrega = distanciaEntregaET.text.toString().toFloatOrNull() ?: 0f
 
         val result = RateCalculator.calcularMonto(ciudad, grupo, distanciaLocal, distanciaEntrega)
-
         lastCalculationDetails = result.detalles
 
         textMonto.text = "Monto Estimado: $${String.format(Locale.getDefault(), "%.2f", result.total)}"
+        showResults()
+    }
 
+    private fun performGroupedCalculation() {
+        val sharedPref = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        val ciudad = sharedPref.getString("CiudadSeleccionada", "Trelew") ?: "Trelew"
+        val grupoStr = sharedPref.getString("GrupoSeleccionado", "1") ?: "1"
+        val grupo = grupoStr.toIntOrNull() ?: 1
+
+        val distanciaLocal = distanciaLocalET.text.toString().toFloatOrNull() ?: 0f
+        
+        // Recolectar distancias: La primera del campo principal + las extra
+        val distancias = mutableListOf<Float>()
+        
+        // 1. Distancia principal (Punto de entrega 1)
+        val distancia1 = distanciaEntregaET.text.toString().toFloatOrNull() ?: 0f
+        if (distancia1 > 0) distancias.add(distancia1)
+
+        // 2. Distancias extra (Punto de entrega 2, 3...)
+        for (i in 0 until layoutExtraDeliveries.childCount) {
+            val container = layoutExtraDeliveries.getChildAt(i) as? LinearLayout
+            val editText = container?.getChildAt(1) as? EditText // El EditText es el segundo hijo
+            val valor = editText?.text?.toString()?.toFloatOrNull()
+            if (valor != null && valor > 0) {
+                distancias.add(valor)
+            }
+        }
+
+        if (distancias.isEmpty()) {
+            Toast.makeText(this, "Ingrese al menos una distancia de entrega", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        val result = RateCalculator.calcularMontoAgrupado(ciudad, grupo, distanciaLocal, distancias)
+        lastCalculationDetails = result.detalles
+
+        textMonto.text = "Monto Agrupado: $${String.format(Locale.getDefault(), "%.2f", result.total)}"
+        showResults()
+    }
+
+    private fun showResults() {
         btnVerDetalles.visibility = View.VISIBLE
         btnVerDetalles.text = "Ver Detalles"
         layoutDetalles.visibility = View.GONE
@@ -187,10 +353,6 @@ class MainActivity : AppCompatActivity() {
     }
 
     // ==================== UTILIDADES ====================
-
-    /**
-     * Oculta el teclado si hay una vista con foco
-     */
     private fun hideKeyboard() {
         val view: View? = currentFocus
         if (view != null) {

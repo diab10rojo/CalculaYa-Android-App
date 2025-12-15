@@ -17,70 +17,61 @@ import android.widget.TextView
  */
 object DetailsPanel {
 
-    // ==================== CONSTANTES DE FORMATO ====================
-
-    // Formato HTML para cada línea de detalle: • Descripción: $Monto
     private const val DETAIL_FORMAT = "• %s: <b>$%.2f</b><br/>"
-
-    // Umbral mínimo para mostrar un monto (evita mostrar $0.00)
     private const val MINIMUM_AMOUNT = 0.01f
 
-    // ==================== MÉTODO PRINCIPAL ====================
-
-    /**
-     * Actualiza el TextView con el desglose detallado del cálculo
-     *
-     * Recorre todos los detalles del cálculo, filtra los montos relevantes,
-     * los formatea en HTML y actualiza el TextView de forma compatible con
-     * todas las versiones de Android.
-     *
-     * @param tvDetalleBase TextView donde se mostrará el desglose
-     * @param detalles Lista de CostDetail con cada concepto y su monto
-     */
     fun update(tvDetalleBase: TextView, detalles: List<CostDetail>) {
         val builder = StringBuilder()
         var totalGeneral = 0f
 
-        // ==================== CONSTRUCCIÓN DEL DESGLOSE ====================
-
-        // Recorrer cada detalle del cálculo
-        for (detail in detalles) {
-            // Solo mostrar montos significativos (mayores a $0.01)
-            if (detail.amount > MINIMUM_AMOUNT) {
-                // Agregar línea formateada: • Concepto: $Monto
-                builder.append(String.format(DETAIL_FORMAT, detail.description, detail.amount))
-
-                // Acumular el total
-                totalGeneral += detail.amount
+        // ==================== RETIRO ====================
+        val retiro = detalles.filter { it.description.contains("Retiro") || it.description.contains("Punto de Retiro") }
+        if (retiro.isNotEmpty()) {
+            builder.append("<b>RETIRO:</b><br/>")
+            retiro.forEach { d ->
+                if (d.amount > MINIMUM_AMOUNT) {
+                    builder.append(String.format(DETAIL_FORMAT, d.description, d.amount))
+                    totalGeneral += d.amount
+                }
             }
+            builder.append("----------------------------<br/>")
         }
 
-        // ==================== AGREGAR TOTAL ====================
+        // ==================== ENTREGAS ====================
+        var entregaActual = -1
+        detalles.filter { it.description.contains("Entrega") }
+            .forEach { d ->
+                val match = Regex("Entrega (\\d+)").find(d.description)
+                val nro = match?.groupValues?.get(1)?.toIntOrNull()
+                if (nro != null && nro != entregaActual) {
+                    if (entregaActual != -1) builder.append("----------------------------<br/>")
+                    builder.append("<b>ENTREGA $nro:</b><br/>")
+                    entregaActual = nro
+                }
+                val limpio = d.description.replace("Entrega $entregaActual - ", "")
+                if (d.amount > MINIMUM_AMOUNT) {
+                    builder.append(String.format(DETAIL_FORMAT, limpio, d.amount))
+                    totalGeneral += d.amount
+                }
+            }
 
-        // Si hay montos para mostrar, agregar el total general
-        if (totalGeneral != 0f) {
-            builder.append("<br/>----------------------------<br/>")
+        // ==================== TOTAL ====================
+        if (totalGeneral > 0f) {
+            builder.append("----------------------------<br/>")
             builder.append("Total Estimado: <b>$%.2f</b>".format(totalGeneral))
         }
 
-        // ==================== CONVERSIÓN HTML ====================
-
-        // Convertir el HTML a texto formateado según la versión de Android
         val htmlText = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            // Android 7.0 (API 24) o superior: usar método actualizado
             Html.fromHtml(builder.toString().trim(), Html.FROM_HTML_MODE_LEGACY)
         } else {
-            // Android anterior a 7.0: usar método legacy
             @Suppress("DEPRECATION")
             Html.fromHtml(builder.toString().trim())
         }
 
-        // ==================== ACTUALIZAR UI ====================
-
-        // Aplicar el texto formateado al TextView
         tvDetalleBase.text = htmlText
     }
 }
+
 
 /**
  * Ejemplo de salida generada:

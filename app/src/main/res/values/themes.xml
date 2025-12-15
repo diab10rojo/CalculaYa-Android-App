@@ -5,5 +5,15 @@
         <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
     </style>
 
-    <style name="Theme.CalculaYa" parent="Base.Theme.CalculaYa" />
+    <style name="Theme.CalculaYa" parent="Base.Theme.CalculaYa">
+        <!-- Make status bar transparent -->
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:windowTranslucentStatus">true</item>
+        <!-- Customize the status bar text color (true for dark text, false for light text). -->
+        <item name="android:windowLightStatusBar">false</item>
+        
+        <!-- Make navigation bar transparent -->
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+        <item name="android:windowTranslucentNavigation">true</item>
+    </style>
 </resources>
