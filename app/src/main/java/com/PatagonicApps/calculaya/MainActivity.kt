@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
+import android.util.Log
 import android.view.Gravity
 import android.view.View
 import android.view.inputmethod.InputMethodManager
@@ -11,6 +12,7 @@ import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.AdView
+import com.google.firebase.messaging.FirebaseMessaging
 import java.util.Locale
 
 class MainActivity : AppCompatActivity() {
@@ -32,7 +34,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var adView: AdView
     private lateinit var imgButtonPlus: ImageButton
     private lateinit var imgButtonMinus: ImageView
-    private lateinit var layoutButtonsPlusMinus: LinearLayout // Contenedor de botones +/-
+    private lateinit var layoutButtonsPlusMinus: LinearLayout
 
     // 🔹 Pedidos Agrupados
     private lateinit var layoutExtraDeliveries: LinearLayout
@@ -45,12 +47,31 @@ class MainActivity : AppCompatActivity() {
     private var lastCalculationDetails: List<CostDetail> = emptyList()
     private var detallesVisibles = false
     private var isGroupMode = false
-    private var lastFocusedEditText: EditText? = null // Para saber qué campo modificar con +/-
+    private var lastFocusedEditText: EditText? = null
 
     // ==================== CICLO DE VIDA ====================
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        // Suscripción a topic de FCM
+        FirebaseMessaging.getInstance().subscribeToTopic("general")
+            .addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    Log.d("FCM", "Suscripción al topic general exitosa")
+                }
+            }
+
+        // ✅ Token FCM solo en DEBUG
+        if (BuildConfig.DEBUG) {
+            FirebaseMessaging.getInstance().token.addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    Log.d("FCM", "Token: ${task.result}")
+                } else {
+                    Log.e("FCM", "Error al obtener el token", task.exception)
+                }
+            }
+        }
 
         RemoteConfigHelper.init()
         initializeViews()
@@ -63,6 +84,12 @@ class MainActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         loadUserConfig()
+    }
+
+    // ✅ AGREGADO: Limpieza de memoria
+    override fun onDestroy() {
+        super.onDestroy()
+        lastFocusedEditText = null // Evitar memory leak
     }
 
     // ==================== INICIALIZACIÓN ====================
@@ -80,18 +107,14 @@ class MainActivity : AppCompatActivity() {
         tvDetalleBase = findViewById(R.id.tvDetalleBase)
         imgButtonPlus = findViewById(R.id.imgButtonPlus)
         imgButtonMinus = findViewById(R.id.imgButtonMinus)
-        // Buscamos el LinearLayout padre de los botones +/-. Como no tiene ID en el XML,
-        // asumimos que es el padre directo de imgButtonPlus.
         layoutButtonsPlusMinus = imgButtonPlus.parent.parent as LinearLayout
 
-        // 🔹 nuevos
         layoutExtraDeliveries = findViewById(R.id.layoutExtraDeliveries)
         btnAddDeliveryPoint = findViewById(R.id.btnAddDeliveryPoint)
         radioGroupMode = findViewById(R.id.radioGroupMode)
         rbSimple = findViewById(R.id.rbSimple)
         rbGrouped = findViewById(R.id.rbGrouped)
 
-        // Inicializamos el foco en el campo de entrega principal
         lastFocusedEditText = distanciaEntregaET
     }
 
@@ -111,7 +134,6 @@ class MainActivity : AppCompatActivity() {
 
     // ==================== LISTENERS ====================
     private fun setupListeners() {
-        // Rastrear foco para saber qué campo editar
         val focusListener = View.OnFocusChangeListener { v, hasFocus ->
             if (hasFocus && v is EditText) {
                 lastFocusedEditText = v
@@ -120,7 +142,6 @@ class MainActivity : AppCompatActivity() {
         distanciaLocalET.onFocusChangeListener = focusListener
         distanciaEntregaET.onFocusChangeListener = focusListener
 
-        // Botón Calcular Único
         botonCalcular.setOnClickListener {
             if (isGroupMode) {
                 performGroupedCalculation()
@@ -130,13 +151,11 @@ class MainActivity : AppCompatActivity() {
             hideKeyboard()
         }
 
-        // Cambio de Modo (Simple <-> Agrupado) mediante RadioGroup
         radioGroupMode.setOnCheckedChangeListener { _, checkedId ->
             isGroupMode = (checkedId == R.id.rbGrouped)
             toggleGroupModeUI()
         }
 
-        // Agregar nuevo punto de entrega (solo en modo agrupado)
         btnAddDeliveryPoint.setOnClickListener {
             addExtraDeliveryField()
         }
@@ -148,14 +167,13 @@ class MainActivity : AppCompatActivity() {
         btnSettings.setOnClickListener {
             startActivity(Intent(this, ConfigActivity::class.java))
         }
-        
-        // Listeners para los botones + y -
+
         imgButtonPlus.setOnClickListener {
             incrementDistancia()
         }
-        
+
         imgButtonMinus.setOnClickListener {
-           decrementDistancia()
+            decrementDistancia()
         }
     }
 
@@ -164,34 +182,30 @@ class MainActivity : AppCompatActivity() {
         if (isGroupMode) {
             layoutExtraDeliveries.visibility = View.VISIBLE
             btnAddDeliveryPoint.visibility = View.VISIBLE
-            layoutButtonsPlusMinus.visibility = View.GONE // Ocultar botones +/-
-            
-            // Si no hay campos extra, agregamos uno por defecto para que sea obvio
+            layoutButtonsPlusMinus.visibility = View.GONE
+
             if (layoutExtraDeliveries.childCount == 0) {
                 addExtraDeliveryField()
             }
         } else {
             layoutExtraDeliveries.visibility = View.GONE
             btnAddDeliveryPoint.visibility = View.GONE
-            layoutExtraDeliveries.removeAllViews() // Limpiamos los campos extra al volver a simple
-            layoutButtonsPlusMinus.visibility = View.VISIBLE // Mostrar botones +/-
-            
-            // Resetear foco al principal al volver
+            layoutExtraDeliveries.removeAllViews()
+            layoutButtonsPlusMinus.visibility = View.VISIBLE
             lastFocusedEditText = distanciaEntregaET
         }
     }
 
     private fun addExtraDeliveryField() {
-        val count = layoutExtraDeliveries.childCount + 2 // +2 porque el 1 es el principal
+        val count = layoutExtraDeliveries.childCount + 2
 
         val container = LinearLayout(this).apply {
             orientation = LinearLayout.HORIZONTAL
             gravity = Gravity.CENTER
             layoutParams = LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
-                40.dpToPx() // Altura fija de 40dp
+                40.dpToPx()
             ).apply {
-                // Margen superior para separar las filas y evitar que se peguen (10dp)
                 topMargin = 10.dpToPx()
             }
         }
@@ -201,7 +215,7 @@ class MainActivity : AppCompatActivity() {
             setTextColor(Color.BLACK)
             setTypeface(null, android.graphics.Typeface.BOLD)
             layoutParams = LinearLayout.LayoutParams(
-                180.dpToPx(), // Ancho fijo coincidente con "Distancia al Local"
+                180.dpToPx(),
                 LinearLayout.LayoutParams.WRAP_CONTENT
             )
         }
@@ -209,23 +223,23 @@ class MainActivity : AppCompatActivity() {
         val editText = EditText(this).apply {
             inputType = android.text.InputType.TYPE_CLASS_NUMBER or android.text.InputType.TYPE_NUMBER_FLAG_DECIMAL
             setTextColor(Color.BLACK)
+            setPadding(0, 0, 0, 0)
+            setIncludeFontPadding(false)
             setBackgroundColor(Color.WHITE)
             gravity = Gravity.CENTER
             setTypeface(null, android.graphics.Typeface.BOLD)
             layoutParams = LinearLayout.LayoutParams(
-                50.dpToPx(), // Width fijo de 50dp
-                LinearLayout.LayoutParams.WRAP_CONTENT // WRAP_CONTENT para igualar altura visual
+                50.dpToPx(),
+                25.dpToPx()
             )
-            
-            // Rastrear foco en campos dinámicos también (aunque los botones +/- estén ocultos en este modo, 
-            // es buena práctica por si decides habilitarlos después)
+
             onFocusChangeListener = View.OnFocusChangeListener { v, hasFocus ->
                 if (hasFocus && v is EditText) {
                     lastFocusedEditText = v
                 }
             }
         }
-        
+
         val unitTextView = TextView(this).apply {
             text = "km"
             setTextColor(Color.BLACK)
@@ -241,13 +255,12 @@ class MainActivity : AppCompatActivity() {
         container.addView(unitTextView)
         layoutExtraDeliveries.addView(container)
     }
-    
-    // Extensión para convertir dp a px
+
     private fun Int.dpToPx(): Int {
         val density = resources.displayMetrics.density
         return (this * density).toInt()
     }
-    
+
     // ==================== OPERACIONES DE BOTONES +/- ====================
     private fun incrementDistancia() {
         val target = lastFocusedEditText ?: distanciaEntregaET
@@ -255,7 +268,7 @@ class MainActivity : AppCompatActivity() {
         val currentValue = currentText.toFloatOrNull() ?: 0f
         val newValue = currentValue + 1
         target.setText(String.format(Locale.US, "%.0f", newValue))
-        target.setSelection(target.text.length) // Mover cursor al final
+        target.setSelection(target.text.length)
     }
 
     private fun decrementDistancia() {
@@ -265,7 +278,7 @@ class MainActivity : AppCompatActivity() {
         if (currentValue > 0) {
             val newValue = currentValue - 1
             target.setText(String.format(Locale.US, "%.0f", newValue))
-            target.setSelection(target.text.length) // Mover cursor al final
+            target.setSelection(target.text.length)
         }
     }
 
@@ -293,18 +306,15 @@ class MainActivity : AppCompatActivity() {
         val grupo = grupoStr.toIntOrNull() ?: 1
 
         val distanciaLocal = distanciaLocalET.text.toString().toFloatOrNull() ?: 0f
-        
-        // Recolectar distancias: La primera del campo principal + las extra
+
         val distancias = mutableListOf<Float>()
-        
-        // 1. Distancia principal (Punto de entrega 1)
+
         val distancia1 = distanciaEntregaET.text.toString().toFloatOrNull() ?: 0f
         if (distancia1 > 0) distancias.add(distancia1)
 
-        // 2. Distancias extra (Punto de entrega 2, 3...)
         for (i in 0 until layoutExtraDeliveries.childCount) {
             val container = layoutExtraDeliveries.getChildAt(i) as? LinearLayout
-            val editText = container?.getChildAt(1) as? EditText // El EditText es el segundo hijo
+            val editText = container?.getChildAt(1) as? EditText
             val valor = editText?.text?.toString()?.toFloatOrNull()
             if (valor != null && valor > 0) {
                 distancias.add(valor)

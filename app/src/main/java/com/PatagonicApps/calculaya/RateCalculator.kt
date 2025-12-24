@@ -5,26 +5,8 @@ import org.threeten.bp.DayOfWeek
 import org.threeten.bp.format.DateTimeFormatter
 import kotlin.math.min
 
-/**
- * Motor de cálculo de tarifas de envío
- *
- * Calcula el monto total de un envío considerando:
- * - Ciudad seleccionada
- * - Grupo tarifario (1-8)
- * - Distancia de retiro (punto A)
- * - Distancia de entrega (punto B)
- * - Día de la semana y horario (tarifas diferenciadas)
- *
- * Sistema de tarifas por tramos:
- * - Cada tramo de distancia tiene un precio por km diferente
- * - Las tarifas varían según día (laborable/sábado/domingo) y horario (día/noche)
- * - Los grupos tienen recargos adicionales
- */
 object RateCalculator {
 
-    /**
-     * Cálculo normal (pedido simple)
-     */
     fun calcularMonto(
         ciudadSeleccionada: String,
         grupo: Int,
@@ -95,13 +77,14 @@ object RateCalculator {
                 montosCiudad.puntoRetiroDia.toFloat() to montosCiudad.puntoEntregaDia.toFloat()
         }
 
-        if (tarifaBaseRetiro > 0f) detalles.add(CostDetail("Punto de Retiro", tarifaBaseRetiro))
-        if (tarifaBaseEntrega > 0f) detalles.add(CostDetail("Punto de Entrega", tarifaBaseEntrega))
+        // ==================== RETIRO ====================
+        var totalRetiro = 0f
 
-        var totalRetiro = tarifaBaseRetiro
-        var totalEntrega = tarifaBaseEntrega
+        if (tarifaBaseRetiro > 0f) {
+            detalles.add(CostDetail("Punto de Retiro", tarifaBaseRetiro))
+            totalRetiro += tarifaBaseRetiro
+        }
 
-        // ==================== TRAMOS DE RETIRO ====================
         var distanciaRestanteLocal = distanciaLocal
         val tramosRetiro = listOf(
             montosCiudad.tramo1Retiro.toFloat(),
@@ -115,6 +98,7 @@ object RateCalculator {
             montosCiudad.distancia3Retiro,
             montosCiudad.distancia4Retiro
         )
+
         for (i in tramosRetiro.indices) {
             if (distanciaRestanteLocal <= 0f) break
             val limiteKm = limitesRetiro.getOrElse(i) { 2.0f }
@@ -128,7 +112,14 @@ object RateCalculator {
             }
         }
 
-        // ==================== TRAMOS DE ENTREGA ====================
+        // ==================== ENTREGA ====================
+        var totalEntrega = 0f
+
+        if (tarifaBaseEntrega > 0f) {
+            detalles.add(CostDetail("Punto de Entrega", tarifaBaseEntrega))
+            totalEntrega += tarifaBaseEntrega
+        }
+
         var distanciaRestanteEntrega = distanciaEntrega
         val tramosEntrega = listOf(
             montosCiudad.tramo1Entrega.toFloat(),
@@ -142,6 +133,7 @@ object RateCalculator {
             montosCiudad.distancia3Entrega,
             montosCiudad.distancia4Entrega
         )
+
         for (i in tramosEntrega.indices) {
             if (distanciaRestanteEntrega <= 0f) break
             val limiteKm = limitesEntrega.getOrElse(i) { 2.0f }
@@ -157,26 +149,22 @@ object RateCalculator {
             }
         }
 
+        // ==================== EXTRA GRUPO - GARANTIZADO ====================
+        // 🔴 ESTO SE AGREGA SIEMPRE QUE SEA > 0
         if (montoFijoExtraGrupo > 0f) {
             detalles.add(CostDetail("Extra Grupo Fijo", montoFijoExtraGrupo))
         }
 
+        // ==================== TOTAL ====================
         val total = totalRetiro + totalEntrega + montoFijoExtraGrupo
+
         detalles.add(CostDetail("Hora de cálculo $horaFormateada", 0f))
 
         return CalculationResult(total, detalles)
     }
 
-    /**
-     * Cálculo agrupado (un retiro, múltiples entregas)
-     *
-     * Lógica:
-     * - Se calcula una sola vez el retiro (tarifa base + tramos de distancia de retiro).
-     * - Por cada entrega:
-     *    - Se suma la tarifa base de entrega (según día/horario).
-     *    - Se suman los tramos de distancia de esa entrega, con extra por km según grupo.
-     *    - Se suma el recargo fijo por grupo de entrega.
-     */
+    // ... (función calcularMontoAgrupado sin cambios)
+
     fun calcularMontoAgrupado(
         ciudadSeleccionada: String,
         grupo: Int,
@@ -191,7 +179,6 @@ object RateCalculator {
                 detalles = listOf(CostDetail("Error: ciudad no encontrada ($ciudadSeleccionada)", 0f))
             )
 
-        // ==================== DETERMINACIÓN DE FRANJA HORARIA ====================
         val ahora = LocalDateTime.now()
         val horaActual = ahora.hour
         var diaDeCobro = ahora.dayOfWeek
@@ -228,7 +215,6 @@ object RateCalculator {
             else -> 0
         }.toFloat()
 
-        // ==================== TARIFAS BASE SEGÚN DÍA Y HORARIO ====================
         val (tarifaBaseRetiro, tarifaBaseEntrega) = when {
             esTarifaMaxima ->
                 montosCiudad.puntoRetiroFindeNoche.toFloat() to montosCiudad.puntoEntregaFindeNoche.toFloat()
@@ -248,9 +234,10 @@ object RateCalculator {
 
         var total = 0f
 
-        // ==================== RETIRO ÚNICO ====================
-        if (tarifaBaseRetiro > 0f) detalles.add(CostDetail("Punto de Retiro", tarifaBaseRetiro))
-        total += tarifaBaseRetiro
+        if (tarifaBaseRetiro > 0f) {
+            detalles.add(CostDetail("Punto de Retiro", tarifaBaseRetiro))
+            total += tarifaBaseRetiro
+        }
 
         var distanciaRestanteLocal = distanciaLocal
         val tramosRetiro = listOf(
@@ -278,16 +265,13 @@ object RateCalculator {
             }
         }
 
-        // ==================== ENTREGAS AGRUPADAS ====================
         distancias.forEachIndexed { index, distancia ->
             if (distancia > 0f) {
-                // Tarifa base de entrega para cada punto
                 if (tarifaBaseEntrega > 0f) {
                     detalles.add(CostDetail("Punto de Entrega ${index + 1}", tarifaBaseEntrega))
                     total += tarifaBaseEntrega
                 }
 
-                // Tramos de la distancia de entrega (con extra por km del grupo)
                 var distanciaRestanteEntrega = distancia
                 val tramosEntrega = listOf(
                     montosCiudad.tramo1Entrega.toFloat(),
@@ -321,7 +305,6 @@ object RateCalculator {
                     }
                 }
 
-                // Recargo fijo por grupo en cada entrega
                 if (montoFijoExtraGrupo > 0f) {
                     detalles.add(CostDetail("Entrega ${index + 1} - Extra Grupo Fijo", montoFijoExtraGrupo))
                     total += montoFijoExtraGrupo

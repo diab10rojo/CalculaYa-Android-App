@@ -25,7 +25,11 @@ object DetailsPanel {
         var totalGeneral = 0f
 
         // ==================== RETIRO ====================
-        val retiro = detalles.filter { it.description.contains("Retiro") || it.description.contains("Punto de Retiro") }
+        val retiro = detalles.filter {
+            it.description.contains("Retiro") ||
+                    it.description == "Punto de Retiro"
+        }
+
         if (retiro.isNotEmpty()) {
             builder.append("<b>RETIRO:</b><br/>")
             retiro.forEach { d ->
@@ -38,29 +42,93 @@ object DetailsPanel {
         }
 
         // ==================== ENTREGAS ====================
-        var entregaActual = -1
-        detalles.filter { it.description.contains("Entrega") }
-            .forEach { d ->
-                val match = Regex("Entrega (\\d+)").find(d.description)
-                val nro = match?.groupValues?.get(1)?.toIntOrNull()
-                if (nro != null && nro != entregaActual) {
-                    if (entregaActual != -1) builder.append("----------------------------<br/>")
-                    builder.append("<b>ENTREGA $nro:</b><br/>")
-                    entregaActual = nro
+        val entregas = detalles.filter {
+            it.description.contains("Entrega") ||
+                    it.description.contains("Punto de Entrega")
+        }
+
+        if (entregas.isNotEmpty()) {
+            // Detectar modo agrupado: buscar "Entrega N -" o "Punto de Entrega N" (con número)
+            val esAgrupado = entregas.any {
+                it.description.matches(Regex(".*Entrega \\d+ -.*")) ||
+                        it.description.matches(Regex("Punto de Entrega \\d+"))
+            }
+
+            if (esAgrupado) {
+                // ==================== MODO AGRUPADO ====================
+                var entregaActual = -1
+
+                entregas.forEach { d ->
+                    // Buscar número de entrega en cualquier patrón
+                    val matchConGuion = Regex("Entrega (\\d+) -").find(d.description)
+                    val matchPuntoEntrega = Regex("Punto de Entrega (\\d+)").find(d.description)
+
+                    val nro = matchConGuion?.groupValues?.get(1)?.toIntOrNull()
+                        ?: matchPuntoEntrega?.groupValues?.get(1)?.toIntOrNull()
+
+                    // Cambiar de sección si es un nuevo número de entrega
+                    if (nro != null && nro != entregaActual) {
+                        if (entregaActual != -1) {
+                            builder.append("----------------------------<br/>")
+                        }
+                        builder.append("<b>ENTREGA $nro:</b><br/>")
+                        entregaActual = nro
+                    }
+
+                    // Limpiar el texto para mostrarlo
+                    var limpio = d.description
+                        .replace(Regex("Entrega \\d+ - "), "")  // Quitar "Entrega N - "
+                        .replace(Regex("Punto de Entrega \\d+"), "Punto de Entrega")  // Normalizar
+
+                    if (d.amount > MINIMUM_AMOUNT) {
+                        builder.append(String.format(DETAIL_FORMAT, limpio, d.amount))
+                        totalGeneral += d.amount
+                    }
                 }
-                val limpio = d.description.replace("Entrega $entregaActual - ", "")
+                builder.append("----------------------------<br/>")
+            } else {
+                // ==================== MODO SIMPLE ====================
+                // ✅ AGREGAR TÍTULO "ENTREGA:" EN NEGRITA
+                builder.append("<b>ENTREGA:</b><br/>")
+
+                entregas.forEach { d ->
+                    if (d.amount > MINIMUM_AMOUNT) {
+                        builder.append(String.format(DETAIL_FORMAT, d.description, d.amount))
+                        totalGeneral += d.amount
+                    }
+                }
+                builder.append("----------------------------<br/>")
+            }
+        }
+
+        // ==================== EXTRAS (GRUPO, ETC.) ====================
+        val extras = detalles.filter {
+            it.description.contains("Extra Grupo") &&
+                    !it.description.matches(Regex(".*Entrega \\d+ -.*"))
+        }
+
+        if (extras.isNotEmpty()) {
+            extras.forEach { d ->
                 if (d.amount > MINIMUM_AMOUNT) {
-                    builder.append(String.format(DETAIL_FORMAT, limpio, d.amount))
+                    builder.append(String.format(DETAIL_FORMAT, d.description, d.amount))
                     totalGeneral += d.amount
                 }
             }
+            builder.append("----------------------------<br/>")
+        }
 
         // ==================== TOTAL ====================
         if (totalGeneral > 0f) {
-            builder.append("----------------------------<br/>")
             builder.append("Total Estimado: <b>$%.2f</b>".format(totalGeneral))
         }
 
+        // ==================== HORA DE CÁLCULO ====================
+        val horaCalculo = detalles.find { it.description.startsWith("Hora de cálculo") }
+        if (horaCalculo != null) {
+            builder.append("<br/><br/><i>${horaCalculo.description}</i>")
+        }
+
+        // ==================== RENDERIZAR HTML ====================
         val htmlText = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             Html.fromHtml(builder.toString().trim(), Html.FROM_HTML_MODE_LEGACY)
         } else {
@@ -71,17 +139,3 @@ object DetailsPanel {
         tvDetalleBase.text = htmlText
     }
 }
-
-
-/**
- * Ejemplo de salida generada:
- *
- * • Punto de Retiro: $150.00
- * • Punto de Entrega: $180.00
- * • Tramo Retiro 1 (2.00 km): $100.00
- * • Tramo Entrega 1 (1.50 km): $90.00
- * • Extra Grupo Fijo: $50.00
- *
- * ----------------------------
- * Total Estimado: $570.00
- */
