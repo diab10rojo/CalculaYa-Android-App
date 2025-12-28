@@ -191,6 +191,27 @@ object RateManager {
                 extraKmRGrupo1 = 0, extraKmRGrupo2 = 0, extraKmRGrupo3 = 0, extraKmRGrupo4 = 0,
                 extraKmRGrupo5 = 0, extraKmRGrupo6 = 0, extraKmRGrupo7 = 0, extraKmRGrupo8 = 0
             ),
+            // 🔹 Mendoza
+            Ciudad(
+                nombre = "Mendoza",
+                puntoRetiroDia = 560, puntoEntregaDia = 285,
+                puntoRetiroFindeDia = 680, puntoEntregaFindeDia = 420,
+                puntoRetiroNoche = 835, puntoEntregaNoche = 500,
+                puntoRetiroFindeNoche = 1335, puntoEntregaFindeNoche = 775,
+                tramo1Retiro = 190, tramo2Retiro = 345, tramo3Retiro = 570, tramo4Retiro = 640,
+                tramo1Entrega = 190, tramo2Entrega = 345, tramo3Entrega = 570, tramo4Entrega = 640,
+                distancia1Retiro = 2f, distancia2Retiro = 2f, distancia3Retiro = 2f, distancia4Retiro = 9999f,
+                distancia1Entrega = 2f, distancia2Entrega = 2f, distancia3Entrega = 2f, distancia4Entrega = 9999f,
+                sEsD = true,
+                extraPEGrupo1 = 275, extraPEGrupo2 = 175, extraPEGrupo3 = 105, extraPEGrupo4 = 55,
+                extraPEGrupo5 = 0, extraPEGrupo6 = 0, extraPEGrupo7 = 0, extraPEGrupo8 = 105,
+                extraPRGrupo1 = 0, extraPRGrupo2 = 0, extraPRGrupo3 = 0, extraPRGrupo4 = 0,
+                extraPRGrupo5 = 0, extraPRGrupo6 = 0, extraPRGrupo7 = 0, extraPRGrupo8 = 0,
+                extraKmEGrupo1 = 0, extraKmEGrupo2 = 0, extraKmEGrupo3 = 0, extraKmEGrupo4 = 0,
+                extraKmEGrupo5 = 0, extraKmEGrupo6 = 0, extraKmEGrupo7 = 0, extraKmEGrupo8 = 0,
+                extraKmRGrupo1 = 0, extraKmRGrupo2 = 0, extraKmRGrupo3 = 0, extraKmRGrupo4 = 0,
+                extraKmRGrupo5 = 0, extraKmRGrupo6 = 0, extraKmRGrupo7 = 0, extraKmRGrupo8 = 0
+            ),
             // 🔹 GBA Oeste
             Ciudad(
                 nombre = "GBA Oeste",
