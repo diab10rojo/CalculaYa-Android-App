@@ -272,6 +272,8 @@
                 android:layout_margin="10dp"
                 android:backgroundTint="@color/black"/>
 
+
+
             <!-- ========================================== -->
             <!-- Resultado -->
             <!-- ========================================== -->
@@ -284,12 +286,23 @@
                 android:textStyle="bold"
                 android:textSize="20sp"/>
 
+
+
+
             <Button
                 android:id="@+id/btnVerDetalles"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Ver Detalles"
                 android:layout_marginTop="10dp"
+                android:visibility="gone"/>
+
+            <!-- Agregalo debajo o al lado del botón Calcular -->
+            <Button
+                android:id="@+id/btnCompararHistorico"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Comparar con tarifa anterior"
                 android:visibility="gone"/>
 
             <androidx.cardview.widget.CardView

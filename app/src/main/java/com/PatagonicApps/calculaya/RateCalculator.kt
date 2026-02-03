@@ -11,11 +11,12 @@ object RateCalculator {
         ciudadSeleccionada: String,
         grupo: Int,
         distanciaLocal: Float,
-        distanciaEntrega: Float
+        distanciaEntrega: Float,
+        listaCiudades: List<Ciudad> = RateManager.listaCiudades
     ): CalculationResult {
         val detalles = mutableListOf<CostDetail>()
 
-        val montosCiudad = RateManager.listaCiudades.find { it.nombre == ciudadSeleccionada }
+        val montosCiudad = listaCiudades.find { it.nombre == ciudadSeleccionada }
             ?: return CalculationResult(
                 total = 0f,
                 detalles = listOf(CostDetail("Error: ciudad no encontrada ($ciudadSeleccionada)", 0f))
@@ -150,7 +151,6 @@ object RateCalculator {
         }
 
         // ==================== EXTRA GRUPO - GARANTIZADO ====================
-        // 🔴 ESTO SE AGREGA SIEMPRE QUE SEA > 0
         if (montoFijoExtraGrupo > 0f) {
             detalles.add(CostDetail("Extra Grupo Fijo", montoFijoExtraGrupo))
         }
@@ -163,17 +163,16 @@ object RateCalculator {
         return CalculationResult(total, detalles)
     }
 
-    // ... (función calcularMontoAgrupado sin cambios)
-
     fun calcularMontoAgrupado(
         ciudadSeleccionada: String,
         grupo: Int,
         distanciaLocal: Float,
-        distancias: List<Float>
+        distancias: List<Float>,
+        listaCiudades: List<Ciudad> = RateManager.listaCiudades
     ): CalculationResult {
         val detalles = mutableListOf<CostDetail>()
 
-        val montosCiudad = RateManager.listaCiudades.find { it.nombre == ciudadSeleccionada }
+        val montosCiudad = listaCiudades.find { it.nombre == ciudadSeleccionada }
             ?: return CalculationResult(
                 total = 0f,
                 detalles = listOf(CostDetail("Error: ciudad no encontrada ($ciudadSeleccionada)", 0f))

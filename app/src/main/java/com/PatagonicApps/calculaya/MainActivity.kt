@@ -26,6 +26,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var botonCalcular: Button
     private lateinit var btnSettings: ImageButton
     private lateinit var btnVerDetalles: Button
+    private lateinit var btnCompararHistorico: Button
     private lateinit var textMonto: TextView
     private lateinit var tvCiudad: TextView
     private lateinit var tvGrupo: TextView
@@ -54,7 +55,6 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        // Suscripción a topic de FCM
         FirebaseMessaging.getInstance().subscribeToTopic("general")
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
@@ -62,7 +62,6 @@ class MainActivity : AppCompatActivity() {
                 }
             }
 
-        // ✅ Token FCM solo en DEBUG
         if (BuildConfig.DEBUG) {
             FirebaseMessaging.getInstance().token.addOnCompleteListener { task ->
                 if (task.isSuccessful) {
@@ -86,10 +85,9 @@ class MainActivity : AppCompatActivity() {
         loadUserConfig()
     }
 
-    // ✅ AGREGADO: Limpieza de memoria
     override fun onDestroy() {
         super.onDestroy()
-        lastFocusedEditText = null // Evitar memory leak
+        lastFocusedEditText = null
     }
 
     // ==================== INICIALIZACIÓN ====================
@@ -102,6 +100,7 @@ class MainActivity : AppCompatActivity() {
         tvCiudad = findViewById(R.id.tVCiudad)
         tvGrupo = findViewById(R.id.tVGrupo)
         btnVerDetalles = findViewById(R.id.btnVerDetalles)
+        btnCompararHistorico = findViewById(R.id.btnCompararHistorico)
         adView = findViewById(R.id.adViewBannerBottom)
         layoutDetalles = findViewById(R.id.layoutDetalles)
         tvDetalleBase = findViewById(R.id.tvDetalleBase)
@@ -122,10 +121,8 @@ class MainActivity : AppCompatActivity() {
     private fun fetchRemoteConfig() {
         RemoteConfigHelper.fetchAndActivate {
             AdsManager.showBanner(adView, RemoteConfigHelper.isAdsEnabled())
-
             val minVersion = RemoteConfigHelper.getMinVersionCode()
             val currentVersion = BuildConfig.VERSION_CODE
-
             if (currentVersion < minVersion || RemoteConfigHelper.isForceUpdateRequired()) {
                 UpdateManager.checkForUpdate(this)
             }
@@ -156,25 +153,11 @@ class MainActivity : AppCompatActivity() {
             toggleGroupModeUI()
         }
 
-        btnAddDeliveryPoint.setOnClickListener {
-            addExtraDeliveryField()
-        }
-
-        btnVerDetalles.setOnClickListener {
-            toggleDetailsPanel()
-        }
-
-        btnSettings.setOnClickListener {
-            startActivity(Intent(this, ConfigActivity::class.java))
-        }
-
-        imgButtonPlus.setOnClickListener {
-            incrementDistancia()
-        }
-
-        imgButtonMinus.setOnClickListener {
-            decrementDistancia()
-        }
+        btnAddDeliveryPoint.setOnClickListener { addExtraDeliveryField() }
+        btnVerDetalles.setOnClickListener { toggleDetailsPanel() }
+        btnSettings.setOnClickListener { startActivity(Intent(this, ConfigActivity::class.java)) }
+        imgButtonPlus.setOnClickListener { incrementDistancia() }
+        imgButtonMinus.setOnClickListener { decrementDistancia() }
     }
 
     // ==================== UI LOGIC ====================
@@ -282,6 +265,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+
     // ==================== LÓGICA DE NEGOCIO ====================
     private fun performSimpleCalculation() {
         val sharedPref = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
@@ -297,6 +281,11 @@ class MainActivity : AppCompatActivity() {
 
         textMonto.text = "Monto Estimado: $${String.format(Locale.getDefault(), "%.2f", result.total)}"
         showResults()
+
+        btnCompararHistorico.visibility = View.VISIBLE
+        btnCompararHistorico.setOnClickListener {
+            compareWithOldRates(ciudad, grupo, distanciaLocal, distanciaEntrega)
+        }
     }
 
     private fun performGroupedCalculation() {
@@ -306,7 +295,6 @@ class MainActivity : AppCompatActivity() {
         val grupo = grupoStr.toIntOrNull() ?: 1
 
         val distanciaLocal = distanciaLocalET.text.toString().toFloatOrNull() ?: 0f
-
         val distancias = mutableListOf<Float>()
 
         val distancia1 = distanciaEntregaET.text.toString().toFloatOrNull() ?: 0f
@@ -331,6 +319,44 @@ class MainActivity : AppCompatActivity() {
 
         textMonto.text = "Monto Agrupado: $${String.format(Locale.getDefault(), "%.2f", result.total)}"
         showResults()
+
+        btnCompararHistorico.visibility = View.VISIBLE
+        btnCompararHistorico.setOnClickListener {
+            compareWithOldRates(ciudad, grupo, distanciaLocal, 0f, distancias)
+        }
+    }
+
+    // ==================== FUNCIÓN DE COMPARACIÓN ====================
+    private fun compareWithOldRates(
+        ciudad: String,
+        grupo: Int,
+        distanciaLocal: Float,
+        distanciaEntrega: Float,
+        distancias: List<Float> = emptyList()
+    ) {
+        val oldRates = RateManager.loadOldRates(this)
+
+        val resultActual = if (isGroupMode) {
+            RateCalculator.calcularMontoAgrupado(ciudad, grupo, distanciaLocal, distancias)
+        } else {
+            RateCalculator.calcularMonto(ciudad, grupo, distanciaLocal, distanciaEntrega)
+        }
+
+        val resultOld = if (isGroupMode) {
+            RateCalculator.calcularMontoAgrupado(ciudad, grupo, distanciaLocal, distancias, oldRates)
+        } else {
+            RateCalculator.calcularMonto(ciudad, grupo, distanciaLocal, distanciaEntrega, oldRates)
+        }
+
+        val diferencia = resultActual.total - resultOld.total
+
+        val mensaje = when {
+            diferencia > 0 -> "El pedido costaba $${String.format("%.2f", resultOld.total)} con la tarifa anterior.\nAhora cuesta más (+$${String.format("%.2f", diferencia)})."
+            diferencia < 0 -> "El pedido costaba $${String.format("%.2f", resultOld.total)} con la tarifa anterior.\nAhora cuesta menos (-$${String.format("%.2f", -diferencia)})."
+            else -> "El pedido cuesta exactamente lo mismo con la tarifa anterior."
+        }
+
+        Toast.makeText(this, mensaje, Toast.LENGTH_LONG).show()
     }
 
     private fun showResults() {
