@@ -119,6 +119,155 @@ object RateManager {
         return listOf(
             Ciudad(
                 nombre = "Trelew",
+                puntoRetiroDia = 585, puntoEntregaDia = 300,
+                puntoRetiroFindeDia = 775, puntoEntregaFindeDia = 475,
+                puntoRetiroNoche = 955, puntoEntregaNoche = 570,
+                puntoRetiroFindeNoche = 1660, puntoEntregaFindeNoche = 965,
+                tramo1Retiro = 240, tramo2Retiro = 420, tramo3Retiro = 650, tramo4Retiro = 730,
+                tramo1Entrega = 240, tramo2Entrega = 420, tramo3Entrega = 650, tramo4Entrega = 730,
+                distancia1Retiro = 2f, distancia2Retiro = 2f, distancia3Retiro = 2f, distancia4Retiro = 9999f,
+                distancia1Entrega = 2f, distancia2Entrega = 2f, distancia3Entrega = 2f, distancia4Entrega = 9999f,
+                sEsD = true,
+                extraPEGrupo1 = 270, extraPEGrupo2 = 175, extraPEGrupo3 = 105, extraPEGrupo4 = 0,
+                extraPEGrupo5 = 0, extraPEGrupo6 = 0, extraPEGrupo7 = 0, extraPEGrupo8 = 0,
+                extraPRGrupo1 = 0, extraPRGrupo2 = 0, extraPRGrupo3 = 0, extraPRGrupo4 = 0,
+                extraPRGrupo5 = 0, extraPRGrupo6 = 0, extraPRGrupo7 = 0, extraPRGrupo8 = 0,
+                extraKmEGrupo1 = 0, extraKmEGrupo2 = 0, extraKmEGrupo3 = 0, extraKmEGrupo4 = 0,
+                extraKmEGrupo5 = 0, extraKmEGrupo6 = 0, extraKmEGrupo7 = 0, extraKmEGrupo8 = 0,
+                extraKmRGrupo1 = 0, extraKmRGrupo2 = 0, extraKmRGrupo3 = 0, extraKmRGrupo4 = 0,
+                extraKmRGrupo5 = 0, extraKmRGrupo6 = 0, extraKmRGrupo7 = 0, extraKmRGrupo8 = 0
+            ),
+            Ciudad(
+                nombre = "San Juan",
+                puntoRetiroDia = 575, puntoEntregaDia = 300,
+                puntoRetiroFindeDia = 725, puntoEntregaFindeDia = 455,
+                puntoRetiroNoche = 920, puntoEntregaNoche = 550,
+                puntoRetiroFindeNoche = 1610, puntoEntregaFindeNoche = 950,
+                tramo1Retiro = 210, tramo2Retiro = 385, tramo3Retiro = 635, tramo4Retiro = 715,
+                tramo1Entrega = 210, tramo2Entrega = 385, tramo3Entrega = 635, tramo4Entrega = 715,
+                distancia1Retiro = 2f, distancia2Retiro = 2f, distancia3Retiro = 2f, distancia4Retiro = 9999f,
+                distancia1Entrega = 2f, distancia2Entrega = 2f, distancia3Entrega = 2f, distancia4Entrega = 9999f,
+                sEsD = true,
+                extraPEGrupo1 = 140, extraPEGrupo2 = 80, extraPEGrupo3 = 50, extraPEGrupo4 = 0,
+                extraPEGrupo5 = 0, extraPEGrupo6 = 0, extraPEGrupo7 = 0, extraPEGrupo8 = 0,
+                extraPRGrupo1 = 0, extraPRGrupo2 = 0, extraPRGrupo3 = 0, extraPRGrupo4 = 0,
+                extraPRGrupo5 = 0, extraPRGrupo6 = 0, extraPRGrupo7 = 0, extraPRGrupo8 = 0,
+                extraKmEGrupo1 = 0, extraKmEGrupo2 = 0, extraKmEGrupo3 = 0, extraKmEGrupo4 = 0,
+                extraKmEGrupo5 = 0, extraKmEGrupo6 = 0, extraKmEGrupo7 = 0, extraKmEGrupo8 = 0,
+                extraKmRGrupo1 = 0, extraKmRGrupo2 = 0, extraKmRGrupo3 = 0, extraKmRGrupo4 = 0,
+                extraKmRGrupo5 = 0, extraKmRGrupo6 = 0, extraKmRGrupo7 = 0, extraKmRGrupo8 = 0
+            ),
+            Ciudad(
+                nombre = "CABA",
+                puntoRetiroDia = 585, puntoEntregaDia = 300,
+                puntoRetiroFindeDia = 775, puntoEntregaFindeDia = 475,
+                puntoRetiroNoche = 955, puntoEntregaNoche = 570,
+                puntoRetiroFindeNoche = 1660, puntoEntregaFindeNoche = 965,
+                tramo1Retiro = 210, tramo2Retiro = 385, tramo3Retiro = 635, tramo4Retiro = 715,
+                tramo1Entrega = 210, tramo2Entrega = 385, tramo3Entrega = 635, tramo4Entrega = 715,
+                distancia1Retiro = 2f, distancia2Retiro = 2f, distancia3Retiro = 2f, distancia4Retiro = 9999f,
+                distancia1Entrega = 2f, distancia2Entrega = 2f, distancia3Entrega = 2f, distancia4Entrega = 9999f,
+                sEsD = true,
+                extraPEGrupo1 = 275, extraPEGrupo2 = 175, extraPEGrupo3 = 105, extraPEGrupo4 = 55,
+                extraPEGrupo5 = 0, extraPEGrupo6 = 0, extraPEGrupo7 = 0, extraPEGrupo8 = 105,
+                extraPRGrupo1 = 0, extraPRGrupo2 = 0, extraPRGrupo3 = 0, extraPRGrupo4 = 0,
+                extraPRGrupo5 = 0, extraPRGrupo6 = 0, extraPRGrupo7 = 0, extraPRGrupo8 = 0,
+                extraKmEGrupo1 = 0, extraKmEGrupo2 = 0, extraKmEGrupo3 = 0, extraKmEGrupo4 = 0,
+                extraKmEGrupo5 = 0, extraKmEGrupo6 = 0, extraKmEGrupo7 = 0, extraKmEGrupo8 = 0,
+                extraKmRGrupo1 = 0, extraKmRGrupo2 = 0, extraKmRGrupo3 = 0, extraKmRGrupo4 = 0,
+                extraKmRGrupo5 = 0, extraKmRGrupo6 = 0, extraKmRGrupo7 = 0, extraKmRGrupo8 = 0
+            ),
+            Ciudad(
+                nombre = "Córdoba",
+                puntoRetiroDia = 585, puntoEntregaDia = 300,
+                puntoRetiroFindeDia = 775, puntoEntregaFindeDia = 475,
+                puntoRetiroNoche = 955, puntoEntregaNoche = 570,
+                puntoRetiroFindeNoche = 1660, puntoEntregaFindeNoche = 965,
+                tramo1Retiro = 210, tramo2Retiro = 385, tramo3Retiro = 635, tramo4Retiro = 715,
+                tramo1Entrega = 210, tramo2Entrega = 385, tramo3Entrega = 635, tramo4Entrega = 715,
+                distancia1Retiro = 2f, distancia2Retiro = 2f, distancia3Retiro = 2f, distancia4Retiro = 9999f,
+                distancia1Entrega = 2f, distancia2Entrega = 2f, distancia3Entrega = 2f, distancia4Entrega = 9999f,
+                sEsD = true,
+                extraPEGrupo1 = 275, extraPEGrupo2 = 175, extraPEGrupo3 = 105, extraPEGrupo4 = 55,
+                extraPEGrupo5 = 0, extraPEGrupo6 = 0, extraPEGrupo7 = 0, extraPEGrupo8 = 105,
+                extraPRGrupo1 = 0, extraPRGrupo2 = 0, extraPRGrupo3 = 0, extraPRGrupo4 = 0,
+                extraPRGrupo5 = 0, extraPRGrupo6 = 0, extraPRGrupo7 = 0, extraPRGrupo8 = 0,
+                extraKmEGrupo1 = 0, extraKmEGrupo2 = 0, extraKmEGrupo3 = 0, extraKmEGrupo4 = 0,
+                extraKmEGrupo5 = 0, extraKmEGrupo6 = 0, extraKmEGrupo7 = 0, extraKmEGrupo8 = 0,
+                extraKmRGrupo1 = 0, extraKmRGrupo2 = 0, extraKmRGrupo3 = 0, extraKmRGrupo4 = 0,
+                extraKmRGrupo5 = 0, extraKmRGrupo6 = 0, extraKmRGrupo7 = 0, extraKmRGrupo8 = 0
+            ),
+            Ciudad(
+                nombre = "GBA Oeste",
+                puntoRetiroDia = 585, puntoEntregaDia = 300,
+                puntoRetiroFindeDia = 775, puntoEntregaFindeDia = 475,
+                puntoRetiroNoche = 955, puntoEntregaNoche = 570,
+                puntoRetiroFindeNoche = 1660, puntoEntregaFindeNoche = 965,
+                tramo1Retiro = 210, tramo2Retiro = 385, tramo3Retiro = 635, tramo4Retiro = 715,
+                tramo1Entrega = 210, tramo2Entrega = 385, tramo3Entrega = 635, tramo4Entrega = 715,
+                distancia1Retiro = 2f, distancia2Retiro = 2f, distancia3Retiro = 2f, distancia4Retiro = 9999f,
+                distancia1Entrega = 2f, distancia2Entrega = 2f, distancia3Entrega = 2f, distancia4Entrega = 9999f,
+                sEsD = true,
+                extraPEGrupo1 = 275, extraPEGrupo2 = 175, extraPEGrupo3 = 105, extraPEGrupo4 = 55,
+                extraPEGrupo5 = 0, extraPEGrupo6 = 0, extraPEGrupo7 = 0, extraPEGrupo8 = 105,
+                extraPRGrupo1 = 0, extraPRGrupo2 = 0, extraPRGrupo3 = 0, extraPRGrupo4 = 0,
+                extraPRGrupo5 = 0, extraPRGrupo6 = 0, extraPRGrupo7 = 0, extraPRGrupo8 = 0,
+                extraKmEGrupo1 = 0, extraKmEGrupo2 = 0, extraKmEGrupo3 = 0, extraKmEGrupo4 = 0,
+                extraKmEGrupo5 = 0, extraKmEGrupo6 = 0, extraKmEGrupo7 = 0, extraKmEGrupo8 = 0,
+                extraKmRGrupo1 = 0, extraKmRGrupo2 = 0, extraKmRGrupo3 = 0, extraKmRGrupo4 = 0,
+                extraKmRGrupo5 = 0, extraKmRGrupo6 = 0, extraKmRGrupo7 = 0, extraKmRGrupo8 = 0
+            ),
+            Ciudad(
+                nombre = "Zona Norte",
+                puntoRetiroDia = 585, puntoEntregaDia = 300,
+                puntoRetiroFindeDia = 775, puntoEntregaFindeDia = 475,
+                puntoRetiroNoche = 955, puntoEntregaNoche = 570,
+                puntoRetiroFindeNoche = 1660, puntoEntregaFindeNoche = 965,
+                tramo1Retiro = 210, tramo2Retiro = 385, tramo3Retiro = 635, tramo4Retiro = 715,
+                tramo1Entrega = 210, tramo2Entrega = 385, tramo3Entrega = 635, tramo4Entrega = 715,
+                distancia1Retiro = 2f, distancia2Retiro = 2f, distancia3Retiro = 2f, distancia4Retiro = 9999f,
+                distancia1Entrega = 2f, distancia2Entrega = 2f, distancia3Entrega = 2f, distancia4Entrega = 9999f,
+                sEsD = true,
+                extraPEGrupo1 = 275, extraPEGrupo2 = 175, extraPEGrupo3 = 105, extraPEGrupo4 = 55,
+                extraPEGrupo5 = 0, extraPEGrupo6 = 0, extraPEGrupo7 = 0, extraPEGrupo8 = 105,
+                extraPRGrupo1 = 0, extraPRGrupo2 = 0, extraPRGrupo3 = 0, extraPRGrupo4 = 0,
+                extraPRGrupo5 = 0, extraPRGrupo6 = 0, extraPRGrupo7 = 0, extraPRGrupo8 = 0,
+                extraKmEGrupo1 = 0, extraKmEGrupo2 = 0, extraKmEGrupo3 = 0, extraKmEGrupo4 = 0,
+                extraKmEGrupo5 = 0, extraKmEGrupo6 = 0, extraKmEGrupo7 = 0, extraKmEGrupo8 = 0,
+                extraKmRGrupo1 = 0, extraKmRGrupo2 = 0, extraKmRGrupo3 = 0, extraKmRGrupo4 = 0,
+                extraKmRGrupo5 = 0, extraKmRGrupo6 = 0, extraKmRGrupo7 = 0, extraKmRGrupo8 = 0
+            ),
+            Ciudad(
+                nombre = "Mendoza",
+                puntoRetiroDia = 585, puntoEntregaDia = 300,
+                puntoRetiroFindeDia = 775, puntoEntregaFindeDia = 475,
+                puntoRetiroNoche = 955, puntoEntregaNoche = 570,
+                puntoRetiroFindeNoche = 1660, puntoEntregaFindeNoche = 965,
+                tramo1Retiro = 210, tramo2Retiro = 385, tramo3Retiro = 635, tramo4Retiro = 715,
+                tramo1Entrega = 210, tramo2Entrega = 385, tramo3Entrega = 635, tramo4Entrega = 715,
+                distancia1Retiro = 2f, distancia2Retiro = 2f, distancia3Retiro = 2f, distancia4Retiro = 9999f,
+                distancia1Entrega = 2f, distancia2Entrega = 2f, distancia3Entrega = 2f, distancia4Entrega = 9999f,
+                sEsD = true,
+                extraPEGrupo1 = 275, extraPEGrupo2 = 175, extraPEGrupo3 = 105, extraPEGrupo4 = 55,
+                extraPEGrupo5 = 0, extraPEGrupo6 = 0, extraPEGrupo7 = 0, extraPEGrupo8 = 105,
+                extraPRGrupo1 = 0, extraPRGrupo2 = 0, extraPRGrupo3 = 0, extraPRGrupo4 = 0,
+                extraPRGrupo5 = 0, extraPRGrupo6 = 0, extraPRGrupo7 = 0, extraPRGrupo8 = 0,
+                extraKmEGrupo1 = 0, extraKmEGrupo2 = 0, extraKmEGrupo3 = 0, extraKmEGrupo4 = 0,
+                extraKmEGrupo5 = 0, extraKmEGrupo6 = 0, extraKmEGrupo7 = 0, extraKmEGrupo8 = 0,
+                extraKmRGrupo1 = 0, extraKmRGrupo2 = 0, extraKmRGrupo3 = 0, extraKmRGrupo4 = 0,
+                extraKmRGrupo5 = 0, extraKmRGrupo6 = 0, extraKmRGrupo7 = 0, extraKmRGrupo8 = 0
+            )
+
+            // 🔹 Podés agregar aquí el resto de ciudades actuales
+        )
+    }
+
+    // ==================== FALLBACK HISTÓRICO ====================
+    private fun getStaticFallbackOldRates(): List<Ciudad> {
+        return listOf(
+            // 🔹 Trelew
+            Ciudad(
+                nombre = "Trelew",
                 puntoRetiroDia = 580, puntoEntregaDia = 295,
                 puntoRetiroFindeDia = 730, puntoEntregaFindeDia = 450,
                 puntoRetiroNoche = 910, puntoEntregaNoche = 545,
@@ -259,161 +408,6 @@ object RateManager {
             )
 
             // 🔹 Podés agregar aquí el resto de ciudades actuales
-        )
-    }
-
-    // ==================== FALLBACK HISTÓRICO ====================
-    private fun getStaticFallbackOldRates(): List<Ciudad> {
-        return listOf(
-            // 🔹 Trelew
-            Ciudad(
-                nombre = "Trelew",
-                puntoRetiroDia = 560, puntoEntregaDia = 285,
-                puntoRetiroFindeDia = 680, puntoEntregaFindeDia = 420,
-                puntoRetiroNoche = 835, puntoEntregaNoche = 500,
-                puntoRetiroFindeNoche = 1335, puntoEntregaFindeNoche = 775,
-                tramo1Retiro = 215, tramo2Retiro = 375, tramo3Retiro = 585, tramo4Retiro = 655,
-                tramo1Entrega = 215, tramo2Entrega = 375, tramo3Entrega = 585, tramo4Entrega = 655,
-                distancia1Retiro = 2f, distancia2Retiro = 2f, distancia3Retiro = 2f, distancia4Retiro = 9999f,
-                distancia1Entrega = 2f, distancia2Entrega = 2f, distancia3Entrega = 2f, distancia4Entrega = 9999f,
-                sEsD = false,
-                extraPEGrupo1 = 270, extraPEGrupo2 = 175, extraPEGrupo3 = 105, extraPEGrupo4 = 0,
-                extraPEGrupo5 = 0, extraPEGrupo6 = 0, extraPEGrupo7 = 0, extraPEGrupo8 = 0,
-                extraPRGrupo1 = 0, extraPRGrupo2 = 0, extraPRGrupo3 = 0, extraPRGrupo4 = 0,
-                extraPRGrupo5 = 0, extraPRGrupo6 = 0, extraPRGrupo7 = 0, extraPRGrupo8 = 0,
-                extraKmEGrupo1 = 0, extraKmEGrupo2 = 0, extraKmEGrupo3 = 0, extraKmEGrupo4 = 0,
-                extraKmEGrupo5 = 0, extraKmEGrupo6 = 0, extraKmEGrupo7 = 0, extraKmEGrupo8 = 0,
-                extraKmRGrupo1 = 0, extraKmRGrupo2 = 0, extraKmRGrupo3 = 0, extraKmRGrupo4 = 0,
-                extraKmRGrupo5 = 0, extraKmRGrupo6 = 0, extraKmRGrupo7 = 0, extraKmRGrupo8 = 0
-            ),
-            // 🔹 SAN JUAN
-            Ciudad(
-                nombre = "San Juan",
-                puntoRetiroDia = 550, puntoEntregaDia = 285,
-                puntoRetiroFindeDia = 640, puntoEntregaFindeDia = 400,
-                puntoRetiroNoche = 805, puntoEntregaNoche = 480,
-                puntoRetiroFindeNoche = 1295, puntoEntregaFindeNoche = 765,
-                tramo1Retiro = 190, tramo2Retiro = 345, tramo3Retiro = 570, tramo4Retiro = 640,
-                tramo1Entrega = 190, tramo2Entrega = 345, tramo3Entrega = 570, tramo4Entrega = 640,
-                distancia1Retiro = 2f, distancia2Retiro = 2f, distancia3Retiro = 2f, distancia4Retiro = 9999f,
-                distancia1Entrega = 2f, distancia2Entrega = 2f, distancia3Entrega = 2f, distancia4Entrega = 9999f,
-                sEsD = false,
-                extraPEGrupo1 = 140, extraPEGrupo2 = 80, extraPEGrupo3 = 50, extraPEGrupo4 = 0,
-                extraPEGrupo5 = 0, extraPEGrupo6 = 0, extraPEGrupo7 = 0, extraPEGrupo8 = 0,
-                extraPRGrupo1 = 0, extraPRGrupo2 = 0, extraPRGrupo3 = 0, extraPRGrupo4 = 0,
-                extraPRGrupo5 = 0, extraPRGrupo6 = 0, extraPRGrupo7 = 0, extraPRGrupo8 = 0,
-                extraKmEGrupo1 = 0, extraKmEGrupo2 = 0, extraKmEGrupo3 = 0, extraKmEGrupo4 = 0,
-                extraKmEGrupo5 = 0, extraKmEGrupo6 = 0, extraKmEGrupo7 = 0, extraKmEGrupo8 = 0,
-                extraKmRGrupo1 = 0, extraKmRGrupo2 = 0, extraKmRGrupo3 = 0, extraKmRGrupo4 = 0,
-                extraKmRGrupo5 = 0, extraKmRGrupo6 = 0, extraKmRGrupo7 = 0, extraKmRGrupo8 = 0
-            ),
-
-
-            // 🔹 CABA
-            Ciudad(
-                nombre = "CABA",
-                puntoRetiroDia = 560, puntoEntregaDia = 285,
-                puntoRetiroFindeDia = 680, puntoEntregaFindeDia = 420,
-                puntoRetiroNoche = 835, puntoEntregaNoche = 500,
-                puntoRetiroFindeNoche = 1335, puntoEntregaFindeNoche = 775,
-                tramo1Retiro = 190, tramo2Retiro = 345, tramo3Retiro = 570, tramo4Retiro = 640,
-                tramo1Entrega = 190, tramo2Entrega = 345, tramo3Entrega = 570, tramo4Entrega = 640,
-                distancia1Retiro = 2f, distancia2Retiro = 2f, distancia3Retiro = 2f, distancia4Retiro = 9999f,
-                distancia1Entrega = 2f, distancia2Entrega = 2f, distancia3Entrega = 2f, distancia4Entrega = 9999f,
-                sEsD = true,
-                extraPEGrupo1 = 275, extraPEGrupo2 = 175, extraPEGrupo3 = 105, extraPEGrupo4 = 55,
-                extraPEGrupo5 = 0, extraPEGrupo6 = 0, extraPEGrupo7 = 0, extraPEGrupo8 = 105,
-                extraPRGrupo1 = 0, extraPRGrupo2 = 0, extraPRGrupo3 = 0, extraPRGrupo4 = 0,
-                extraPRGrupo5 = 0, extraPRGrupo6 = 0, extraPRGrupo7 = 0, extraPRGrupo8 = 0,
-                extraKmEGrupo1 = 0, extraKmEGrupo2 = 0, extraKmEGrupo3 = 0, extraKmEGrupo4 = 0,
-                extraKmEGrupo5 = 0, extraKmEGrupo6 = 0, extraKmEGrupo7 = 0, extraKmEGrupo8 = 0,
-                extraKmRGrupo1 = 0, extraKmRGrupo2 = 0, extraKmRGrupo3 = 0, extraKmRGrupo4 = 0,
-                extraKmRGrupo5 = 0, extraKmRGrupo6 = 0, extraKmRGrupo7 = 0, extraKmRGrupo8 = 0
-            ),
-            // 🔹 Zona Norte
-            Ciudad(
-                nombre = "Zona Norte",
-                puntoRetiroDia = 560, puntoEntregaDia = 285,
-                puntoRetiroFindeDia = 680, puntoEntregaFindeDia = 420,
-                puntoRetiroNoche = 835, puntoEntregaNoche = 500,
-                puntoRetiroFindeNoche = 1335, puntoEntregaFindeNoche = 775,
-                tramo1Retiro = 190, tramo2Retiro = 345, tramo3Retiro = 570, tramo4Retiro = 640,
-                tramo1Entrega = 190, tramo2Entrega = 345, tramo3Entrega = 570, tramo4Entrega = 640,
-                distancia1Retiro = 2f, distancia2Retiro = 2f, distancia3Retiro = 2f, distancia4Retiro = 9999f,
-                distancia1Entrega = 2f, distancia2Entrega = 2f, distancia3Entrega = 2f, distancia4Entrega = 9999f,
-                sEsD = true,
-                extraPEGrupo1 = 275, extraPEGrupo2 = 175, extraPEGrupo3 = 105, extraPEGrupo4 = 55,
-                extraPEGrupo5 = 0, extraPEGrupo6 = 0, extraPEGrupo7 = 0, extraPEGrupo8 = 105,
-                extraPRGrupo1 = 0, extraPRGrupo2 = 0, extraPRGrupo3 = 0, extraPRGrupo4 = 0,
-                extraPRGrupo5 = 0, extraPRGrupo6 = 0, extraPRGrupo7 = 0, extraPRGrupo8 = 0,
-                extraKmEGrupo1 = 0, extraKmEGrupo2 = 0, extraKmEGrupo3 = 0, extraKmEGrupo4 = 0,
-                extraKmEGrupo5 = 0, extraKmEGrupo6 = 0, extraKmEGrupo7 = 0, extraKmEGrupo8 = 0,
-                extraKmRGrupo1 = 0, extraKmRGrupo2 = 0, extraKmRGrupo3 = 0, extraKmRGrupo4 = 0,
-                extraKmRGrupo5 = 0, extraKmRGrupo6 = 0, extraKmRGrupo7 = 0, extraKmRGrupo8 = 0
-            ),
-            // 🔹 Córdoba
-            Ciudad(
-                nombre = "Córdoba",
-                puntoRetiroDia = 560, puntoEntregaDia = 285,
-                puntoRetiroFindeDia = 680, puntoEntregaFindeDia = 420,
-                puntoRetiroNoche = 835, puntoEntregaNoche = 500,
-                puntoRetiroFindeNoche = 1335, puntoEntregaFindeNoche = 775,
-                tramo1Retiro = 190, tramo2Retiro = 345, tramo3Retiro = 570, tramo4Retiro = 640,
-                tramo1Entrega = 190, tramo2Entrega = 345, tramo3Entrega = 570, tramo4Entrega = 640,
-                distancia1Retiro = 2f, distancia2Retiro = 2f, distancia3Retiro = 2f, distancia4Retiro = 9999f,
-                distancia1Entrega = 2f, distancia2Entrega = 2f, distancia3Entrega = 2f, distancia4Entrega = 9999f,
-                sEsD = true,
-                extraPEGrupo1 = 275, extraPEGrupo2 = 175, extraPEGrupo3 = 105, extraPEGrupo4 = 55,
-                extraPEGrupo5 = 0, extraPEGrupo6 = 0, extraPEGrupo7 = 0, extraPEGrupo8 = 105,
-                extraPRGrupo1 = 0, extraPRGrupo2 = 0, extraPRGrupo3 = 0, extraPRGrupo4 = 0,
-                extraPRGrupo5 = 0, extraPRGrupo6 = 0, extraPRGrupo7 = 0, extraPRGrupo8 = 0,
-                extraKmEGrupo1 = 0, extraKmEGrupo2 = 0, extraKmEGrupo3 = 0, extraKmEGrupo4 = 0,
-                extraKmEGrupo5 = 0, extraKmEGrupo6 = 0, extraKmEGrupo7 = 0, extraKmEGrupo8 = 0,
-                extraKmRGrupo1 = 0, extraKmRGrupo2 = 0, extraKmRGrupo3 = 0, extraKmRGrupo4 = 0,
-                extraKmRGrupo5 = 0, extraKmRGrupo6 = 0, extraKmRGrupo7 = 0, extraKmRGrupo8 = 0
-            ),
-            // 🔹 Mendoza
-            Ciudad(
-                nombre = "Mendoza",
-                puntoRetiroDia = 560, puntoEntregaDia = 285,
-                puntoRetiroFindeDia = 680, puntoEntregaFindeDia = 420,
-                puntoRetiroNoche = 835, puntoEntregaNoche = 500,
-                puntoRetiroFindeNoche = 1335, puntoEntregaFindeNoche = 775,
-                tramo1Retiro = 190, tramo2Retiro = 345, tramo3Retiro = 570, tramo4Retiro = 640,
-                tramo1Entrega = 190, tramo2Entrega = 345, tramo3Entrega = 570, tramo4Entrega = 640,
-                distancia1Retiro = 2f, distancia2Retiro = 2f, distancia3Retiro = 2f, distancia4Retiro = 9999f,
-                distancia1Entrega = 2f, distancia2Entrega = 2f, distancia3Entrega = 2f, distancia4Entrega = 9999f,
-                sEsD = true,
-                extraPEGrupo1 = 275, extraPEGrupo2 = 175, extraPEGrupo3 = 105, extraPEGrupo4 = 55,
-                extraPEGrupo5 = 0, extraPEGrupo6 = 0, extraPEGrupo7 = 0, extraPEGrupo8 = 105,
-                extraPRGrupo1 = 0, extraPRGrupo2 = 0, extraPRGrupo3 = 0, extraPRGrupo4 = 0,
-                extraPRGrupo5 = 0, extraPRGrupo6 = 0, extraPRGrupo7 = 0, extraPRGrupo8 = 0,
-                extraKmEGrupo1 = 0, extraKmEGrupo2 = 0, extraKmEGrupo3 = 0, extraKmEGrupo4 = 0,
-                extraKmEGrupo5 = 0, extraKmEGrupo6 = 0, extraKmEGrupo7 = 0, extraKmEGrupo8 = 0,
-                extraKmRGrupo1 = 0, extraKmRGrupo2 = 0, extraKmRGrupo3 = 0, extraKmRGrupo4 = 0,
-                extraKmRGrupo5 = 0, extraKmRGrupo6 = 0, extraKmRGrupo7 = 0, extraKmRGrupo8 = 0
-            ),
-            // 🔹 GBA Oeste
-            Ciudad(
-                nombre = "GBA Oeste",
-                puntoRetiroDia = 560, puntoEntregaDia = 285,
-                puntoRetiroFindeDia = 680, puntoEntregaFindeDia = 420,
-                puntoRetiroNoche = 835, puntoEntregaNoche = 500,
-                puntoRetiroFindeNoche = 1335, puntoEntregaFindeNoche = 775,
-                tramo1Retiro = 190, tramo2Retiro = 345, tramo3Retiro = 570, tramo4Retiro = 640,
-                tramo1Entrega = 190, tramo2Entrega = 345, tramo3Entrega = 570, tramo4Entrega = 640,
-                distancia1Retiro = 2f, distancia2Retiro = 2f, distancia3Retiro = 2f, distancia4Retiro = 9999f,
-                distancia1Entrega = 2f, distancia2Entrega = 2f, distancia3Entrega = 2f, distancia4Entrega = 9999f,
-                sEsD = true,
-                extraPEGrupo1 = 275, extraPEGrupo2 = 175, extraPEGrupo3 = 105, extraPEGrupo4 = 55,
-                extraPEGrupo5 = 0, extraPEGrupo6 = 0, extraPEGrupo7 = 0, extraPEGrupo8 = 105,
-                extraPRGrupo1 = 0, extraPRGrupo2 = 0, extraPRGrupo3 = 0, extraPRGrupo4 = 0,
-                extraPRGrupo5 = 0, extraPRGrupo6 = 0, extraPRGrupo7 = 0, extraPRGrupo8 = 0,
-                extraKmEGrupo1 = 0, extraKmEGrupo2 = 0, extraKmEGrupo3 = 0, extraKmEGrupo4 = 0,
-                extraKmEGrupo5 = 0, extraKmEGrupo6 = 0, extraKmEGrupo7 = 0, extraKmEGrupo8 = 0,
-                extraKmRGrupo1 = 0, extraKmRGrupo2 = 0, extraKmRGrupo3 = 0, extraKmRGrupo4 = 0,
-                extraKmRGrupo5 = 0, extraKmRGrupo6 = 0, extraKmRGrupo7 = 0, extraKmRGrupo8 = 0
-            )
         )
             // 🔹 Podés agregar aquí más ciudades históricas si querés
 

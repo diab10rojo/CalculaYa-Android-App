@@ -12,8 +12,8 @@ android {
         applicationId = "com.PatagonicApps.calculaya"
         minSdk = 24
         targetSdk = 35
-        versionCode = 11
-        versionName = "2.4"
+        versionCode = 12
+        versionName = "3.1"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
